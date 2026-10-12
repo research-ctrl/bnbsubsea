@@ -1,0 +1,19 @@
+# Standalone project (no parent workspace). Installed with pnpm 11.25.0 (package.json "packageManager"):
+# locally `corepack pnpm@11.25.0 install`; on Vercel through Corepack (ENABLE_EXPERIMENTAL_COREPACK=1).
+minimumReleaseAge: 10080
+minimumReleaseAgeIgnoreMissingTime: false
+trustLockfile: false
+strictDepBuilds: true
+allowBuilds:
+  esbuild: true
+  fsevents: true
+  sharp: true
+  unrs-resolver: true
+# Project-local package store (kept off the system drive on the development machine).
+storeDir: ${SITES_PNPM_SHARED_STORE:-.sites-runtime/pnpm-store}
+cacheDir: ${SITES_PNPM_SHARED_STORE:-.sites-runtime/pnpm-store}/policy-cache
+enableGlobalVirtualStore: false
+# Reuse store files with clones or hardlinks before falling back to copies.
+packageImportMethod: auto
+verifyDepsBeforeRun: false
+optimisticRepeatInstall: false

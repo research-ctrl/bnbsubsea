@@ -1,0 +1,14 @@
+# Not uploaded by `vercel deploy` from a local checkout (Git deployments only see tracked files anyway).
+# Local package store and tool state
+.sites-runtime
+.wrangler
+.vinext
+# Enquiries received by the local dev server (personal data)
+.dev-enquiries
+# Build output: Vercel builds it from source
+dist
+tsconfig.tsbuildinfo
+.agents
+.codex
+outputs
+work

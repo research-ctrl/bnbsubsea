@@ -1,0 +1,82 @@
+{
+  "id": "lourdes",
+  "frames": 360,
+  "width": 1600,
+  "height": 900,
+  "sets": {
+    "lg": {
+      "path": "/sequences/lourdes/lg/{n}.webp",
+      "pad": 4,
+      "step": 1,
+      "width": 1600,
+      "height": 900
+    },
+    "sm": {
+      "path": "/sequences/lourdes/sm/{n}.webp",
+      "pad": 4,
+      "step": 2,
+      "width": 960,
+      "height": 540
+    }
+  },
+  "poster": {
+    "lg": "/sequences/lourdes/poster-lg.webp",
+    "sm": "/sequences/lourdes/poster-sm.webp"
+  },
+  "chapters": [
+    {
+      "id": "arrival",
+      "title": "Arrival",
+      "start": 1,
+      "end": 69,
+      "still": {
+        "lg": "/sequences/lourdes/still-arrival-lg.webp",
+        "sm": "/sequences/lourdes/still-arrival-sm.webp"
+      }
+    },
+    {
+      "id": "roro-access",
+      "title": "Ro-Ro access",
+      "start": 70,
+      "end": 130,
+      "still": {
+        "lg": "/sequences/lourdes/still-roro-access-lg.webp",
+        "sm": "/sequences/lourdes/still-roro-access-sm.webp"
+      }
+    },
+    {
+      "id": "inside",
+      "title": "Inside the vessel",
+      "start": 131,
+      "end": 230,
+      "still": {
+        "lg": "/sequences/lourdes/still-inside-lg.webp",
+        "sm": "/sequences/lourdes/still-inside-sm.webp"
+      }
+    },
+    {
+      "id": "systems",
+      "title": "Systems",
+      "start": 231,
+      "end": 299,
+      "still": {
+        "lg": "/sequences/lourdes/still-systems-lg.webp",
+        "sm": "/sequences/lourdes/still-systems-sm.webp"
+      }
+    },
+    {
+      "id": "reassembly",
+      "title": "Reassembly",
+      "start": 300,
+      "end": 360,
+      "still": {
+        "lg": "/sequences/lourdes/still-reassembly-lg.webp",
+        "sm": "/sequences/lourdes/still-reassembly-sm.webp"
+      }
+    }
+  ],
+  "bytes": {
+    "lg": 16057074,
+    "sm": 3391598
+  }
+}
