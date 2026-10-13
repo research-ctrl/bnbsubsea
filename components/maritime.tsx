@@ -5,8 +5,9 @@ import { ScrollSequence } from "@/components/scroll-sequence";
 import { Drawings } from "@/components/drawings";
 import { ShipyardSection } from "@/components/shipyard-section";
 import { RoutesSection } from "@/components/routes-section";
+import { RangeSection } from "@/components/range-section";
 import { PosterPicture } from "@/components/poster-picture";
-import { company, lourdes, lourdesStory, type Figure } from "@/lib/site-content";
+import { company, lourdes, lourdesStory, shorebridge55, vesselRange, type Figure, type SpecRow } from "@/lib/site-content";
 
 function Figures({ items, className = "" }: { items: Figure[]; className?: string }) {
   return (
@@ -24,27 +25,44 @@ function Figures({ items, className = "" }: { items: Figure[]; className?: strin
   );
 }
 
+/** "Label: value" lines of the model block, with the value emphasised (the text reads exactly as written) */
+function LabelledLine({ label, value, className }: { label: string; value: string; className?: string }) {
+  return (
+    <p className={className}>
+      {label}: <strong>{value}</strong>
+    </p>
+  );
+}
+
+/**
+ * Hero: leads with the model (owner's email, 13 Oct 2026). The title block reads, in order: BNB SHOREBRIDGE 55 /
+ * 55-metre Landing Craft / Cargo Ro-Ro / Reference newbuild: LOURDES / Status: Current newbuild programme. The
+ * classification is a separate tag; the figures are GA values plus the owner's cargo payload.
+ */
 function LourdesHero() {
   const p = lourdes.hero;
   return (
-    <section className={"hero" + (p.treatment === "sketch" ? " hero--sketch" : "")} id="lourdes" aria-labelledby="lourdes-title">
+    <section className={"hero" + (p.treatment === "sketch" ? " hero--sketch" : "")} id="lourdes" aria-labelledby="hero-title">
       <PosterPicture poster={p} className="hero-media" priority />
       <div className="hero-shade" aria-hidden="true" />
       <div className="wrap hero-inner">
         <div className="hero-top">
-          <p className="eyebrow eyebrow--light">{lourdes.edition}</p>
-          <span className="tag tag--dark">{lourdes.status}</span>
+          <p className="eyebrow eyebrow--light">{lourdes.eyebrow}</p>
+          <span className="tag tag--dark">{shorebridge55.classification}</span>
         </div>
         <div className="hero-title">
-          <p className="hero-type">{lourdes.type}</p>
-          <h1 id="lourdes-title">{lourdes.name}</h1>
-          <p className="hero-tagline">{lourdes.tagline}</p>
+          <h1 id="hero-title">{shorebridge55.model}</h1>
+          <p className="hero-descriptor">{shorebridge55.descriptor}</p>
+          <div className="hero-identity">
+            <LabelledLine label={shorebridge55.referenceLabel} value={shorebridge55.vessel} />
+            <LabelledLine label={shorebridge55.statusLabel} value={shorebridge55.status} />
+          </div>
           <div className="hero-actions">
             <a className="button button--light" href="#lourdes-story">
               Explore the vessel
             </a>
-            <a className="button button--outline-light" href="#contact">
-              Enquire about Lourdes
+            <a className="button button--outline-light" href={vesselRange.model.enquire.href}>
+              {vesselRange.model.enquire.label}
             </a>
           </div>
         </div>
@@ -55,34 +73,48 @@ function LourdesHero() {
   );
 }
 
+function SpecTable({ rows, labelledBy }: { rows: SpecRow[]; labelledBy: string }) {
+  return (
+    <dl className="spec-table" aria-labelledby={labelledBy}>
+      {rows.map(s => (
+        <div key={s.label}>
+          <dt>{s.label}</dt>
+          <dd>
+            {s.value}
+            {s.note && <small>{s.note}</small>}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+/** Specifications, headed by the model: identity rows, then the GA particulars, then classification on its own. */
 function Specifications() {
   return (
     <section className="specs section" id="specifications" aria-labelledby="specifications-title">
       <div className="wrap specs-grid">
         <div className="specs-intro">
-          <p className="eyebrow">The vessel at a glance</p>
-          <h2 id="specifications-title">
-            PURPOSE IN
-            <br />
-            EVERY DETAIL.
-          </h2>
-          <p>{lourdes.specsIntro}</p>
+          <p className="eyebrow">Specifications</p>
+          <h2 id="specifications-title">{shorebridge55.model}</h2>
+          <LabelledLine className="specs-reference" label={shorebridge55.referenceLabel} value={shorebridge55.vessel} />
+          <p className="specs-lead">{lourdes.specsIntro}</p>
+          <p className="specs-nominal">{lourdes.specsNominal}</p>
           <a className="text-link" href="#capabilities">
             Explore its capabilities
           </a>
           <p className="source-note">{lourdes.specsSource}</p>
         </div>
-        <dl className="spec-table">
-          {lourdes.specs.map(s => (
-            <div key={s.label}>
-              <dt>{s.label}</dt>
-              <dd>
-                {s.value}
-                {s.note && <small>{s.note}</small>}
-              </dd>
+        <div className="spec-groups">
+          {lourdes.specGroups.map(g => (
+            <div className="spec-group" key={g.id}>
+              <h3 className="spec-group-title" id={`spec-${g.id}`}>
+                {g.title}
+              </h3>
+              <SpecTable rows={g.rows} labelledBy={`spec-${g.id}`} />
             </div>
           ))}
-        </dl>
+        </div>
       </div>
     </section>
   );
@@ -97,6 +129,7 @@ function Capabilities() {
             <p className="eyebrow eyebrow--light">Designed for its purpose</p>
             <h2 id="capabilities-title">CAPABLE BY DESIGN.</h2>
           </div>
+          <p>{lourdes.tagline}</p>
         </div>
         <div className="capability-grid">
           {lourdes.capabilities.map((c, i) => (
@@ -142,7 +175,8 @@ export function HomeExperience() {
       <main id="main">
         <LourdesHero />
         <span id="inside-lourdes" className="anchor-alias" aria-hidden="true" />
-        <ScrollSequence story={lourdesStory} skipTo="drawings" skipLabel="Skip the vessel story" />
+        <ScrollSequence story={lourdesStory} skipTo={vesselRange.id} skipLabel="Skip the vessel story" />
+        <RangeSection />
         <Drawings />
         <Specifications />
         <Capabilities />

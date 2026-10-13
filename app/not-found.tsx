@@ -16,7 +16,7 @@ export default function NotFound() {
         <div className="wrap">
           <p className="eyebrow eyebrow--light">404 / Page not found</p>
           <h1>THIS PAGE IS NOT HERE.</h1>
-          <p>The page you asked for does not exist or has moved. Everything about Lourdes, our shipyard and her route of operation is on the home page.</p>
+          <p>The page you asked for does not exist or has moved. Everything about the BNB SHOREBRIDGE 55 and LOURDES, our shipyard and her route of operation is on the home page.</p>
           <div className="not-found-actions">
             {/* plain anchors: next/link threw on click in the production build (a full page load is intended) */}
             {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}

@@ -1,6 +1,6 @@
 # Vessel and site sources
 
-Updated 12 October 2026 (integration pass; review fixes the same day). Since the 12 October scope change the website presents **Lourdes only**: its specifications and design, our shipyard at Fomar, Shiroda, Goa, where Lourdes will be built, and its route of operation. Every claim on the site is tagged as one of:
+Updated 13 October 2026 (model naming, owner's presentation email and answers). Since the 12 October scope change the website presents **one vessel only**: LOURDES, presented since 13 October under the commercial model name **BNB SHOREBRIDGE 55** (section 0), with her specifications and design, our shipyard at Fomar, Shiroda, Goa (home of the LOURDES newbuild programme) and her route of operation. Every claim on the site is tagged as one of:
 
 - **Verified**: taken from a supplied drawing or brief and checked against it.
 - **Illustration**: a design visualisation, schematic or illustrative map. The site labels it as such.
@@ -8,7 +8,17 @@ Updated 12 October 2026 (integration pass; review fixes the same day). Since the
 
 Supplied references live in `BNB_Website/references_supplied/` (read-only). Nothing unsourced is published.
 
-## 1. Lourdes (Ro-Ro / landing craft)
+## 0. Model name: BNB SHOREBRIDGE 55 (owner's email and answers, 13 Oct 2026)
+
+**Source: owner instruction.** Email "SHOREBRIDGE 55 / LOURDES — Website Presentation" and the owner's answers of 13 Oct 2026.
+
+- **BNB SHOREBRIDGE 55** is the commercial model name for LOURDES, not a technical classification. SHOREBRIDGE = our landing craft / cargo Ro-Ro series; 55 = the model's nominal length in metres; LOURDES = the individual vessel's name. Each vessel keeps her own name; later models follow SHOREBRIDGE + nominal length once their designs exist (none is announced).
+- Under Commercial Vessels → Landing Craft & Cargo Ro-Ro the site shows exactly: "BNB SHOREBRIDGE 55" / "55-metre Landing Craft / Cargo Ro-Ro" / "Reference newbuild: LOURDES" / "Status: Current newbuild programme" (`shorebridge55.lines` in `lib/site-content.ts`). The hero leads with the same block.
+- **55 is nominal, not measured.** The owner asked to keep "55" in the title and the "55-metre" line as written. The measured particulars follow the GA (52.68 m overall with ramp, 51.00 m hull); the specifications section says so next to the table, and so does the footer (SOURCE_CONFLICTS SB-1).
+- **Design-to-order card.** "400–500 DWT Landing Craft — Design-to-Order Enquiries Welcome" with "Configuration and specifications subject to engineering feasibility and applicable approvals." Text only: no SHOREBRIDGE number, no specifications, no picture; it is an invitation to enquire, not a design. Any future illustration must be labelled concept (SB-7).
+- **Enquiry subjects.** The contact form's "Enquiry about" list is "BNB SHOREBRIDGE 55 / LOURDES", "400–500 DWT design-to-order landing craft" and "Shipyard / general" (`ENQUIRY_INTERESTS` in `lib/enquiry.ts`, enforced by the API too). Links to `#enquire-shorebridge-55` (hero and model card buttons) and `#enquire-design-to-order` preselect the subject. For a transition period the API also accepts the retired "Shipbuilding", which pages loaded before the deployment still send, and stores it as "Shipyard / general" (SOURCE_CONFLICTS SB-10).
+
+## 1. LOURDES, reference newbuild of the BNB SHOREBRIDGE 55 (landing craft / cargo Ro-Ro)
 
 **Verified: general arrangement.** Nirmon general arrangement, Rev 0, 07.10.2026 (A1, 1:90). This governs all Lourdes particulars. The site cites it without a drawing number: the title block reads DRAWING NO NI564-101 (PROJECT NO NI564), while the supplied file name and PDF metadata say nd664-101 (SOURCE_CONFLICTS INT-8). File: `references_supplied/Nirmon_GA_ND664-101_2026-10-07.pdf`.
 
@@ -23,12 +33,16 @@ Supplied references live in `BNB_Website/references_supplied/` (read-only). Noth
 | Speed | approx. 10 knots | GA |
 | Hull design basis | sea state 5 | GA |
 | Flag / class | Malta / Bureau Veritas | GA |
+| Cargo payload | 610 t | **Owner figure, 13 Oct 2026; not on the GA** (labelled "Company figure; not stated on the general arrangement" on the site; SOURCE_CONFLICTS SB-2) |
+| Deadweight | not published | None supplied; the GA has none, and 800 t stays "maximum loading capacity" as the GA labels it (SB-3) |
+| Deck particulars | not published | The GA's main particulars give none (deck area, deck load); omitted (SB-4) |
+| Model | BNB SHOREBRIDGE 55 (55 = nominal length) | Owner instruction, 13 Oct 2026 (section 0) |
 | Build yard | BNBSBD shipyard, Fomar, Shiroda, Goa | User instruction, 12 Oct 2026 |
-| Status | To be built at our shipyard in Fomar, Shiroda | User instruction, 12 Oct 2026 (SOURCE_CONFLICTS WEB-1) |
+| Status | Current newbuild programme | Owner instruction, 13 Oct 2026 (SB-5; replaces "To be built", WEB-1) |
 
 **Not published:** crew count. The GA shows 11; earlier public particulars said 9 (SOURCE_CONFLICTS #2).
 
-**Midship section (informs structure only, never shown).** Midship ND664-401, Rev 0, 09.05.2026, is used only as the basis for the internal structure in the explanatory animation: web frames at 1.5 m, longitudinal bulkheads at ±3.0 m, pillars, tank and void layout. **The midship drawing is not published, is not displayed anywhere on the site, and no midship image file exists in `public/`.** Its title block (55.00 m LOA, closed ramp) is superseded by the GA (SOURCE_CONFLICTS #1).
+**Midship section (informs structure only, never shown).** Midship ND664-401, Rev 0, 09.05.2026, is used only as the basis for the internal structure in the explanatory animation: web frames at 1.5 m, longitudinal bulkheads at ±3.0 m, pillars, tank and void layout. **The midship drawing is not published, is not displayed anywhere on the site, and no midship image file exists in `public/`.** Its title block (55.00 m LOA, closed ramp) is superseded by the GA (SOURCE_CONFLICTS #1). The story's "Inside the vessel" copy names two of its figures (web frames every 1.5 m, longitudinal bulkheads either side of the centreline); whether to keep them is an open owner question (SOURCE_CONFLICTS SB-11).
 
 **Published drawings (GA crops only).**
 
@@ -45,7 +59,7 @@ Both are cropped from the 07.10.2026 GA. No title block is published.
 
 **Class, cyber and beach-landing wording.**
 
-- Bureau Veritas: "to be built to BV class" and "Bureau Veritas classification" only. Not described as built or certified.
+- Bureau Veritas: "Under Bureau Veritas (BV) classification", the owner's wording of 13 Oct 2026 (SB-6), stated on its own: a separate Classification row in the specifications and a tag in the hero, apart from the model name and the particulars. Not described as classed, built or certified.
 - Cyber resilience: "notation in scope", "not yet certified". No certificate is implied.
 - Beach landing: the capability is kept as stated in the brief ("designed for beach landing operations, at suitable, permitted beaches, within the operating limits"). The GA and midship text say nothing about a strengthened bottom, so that mechanism is not claimed. **Needs input:** engineering confirmation of the beaching arrangement and limits (SOURCE_CONFLICTS #11).
 
@@ -66,7 +80,7 @@ No other yard facts (plot area, cranes, slipway type, workforce) are published.
 
 **What the section shows.**
 
-- Hero visual: `public/images/yard/yard-hero-*.webp`, an illustrative aerial render of the yard with Lourdes in the ship building area, from our own Blender scene `blender/yard/Yard_Lourdes.blend`: a monochrome architectural model (no trees) with Lourdes in colour. Captioned "Illustration … (to be built)" because the hull looks finished (YD-8). Building heights, quay fittings, keel blocks and shores are illustrative (YD-9).
+- Hero visual: `public/images/yard/yard-hero-*.webp`, an illustrative aerial render of the yard with Lourdes in the ship building area, from our own Blender scene `blender/yard/Yard_Lourdes.blend`: a monochrome architectural model (no trees) with Lourdes in colour. Captioned "Illustration / … with LOURDES shown complete in the ship building area" because the hull looks finished (YD-8; until 13 Oct the caption ended "(to be built)", see SB-5). Building heights, quay fittings, keel blocks and shores are illustrative (YD-9).
 - Schematic site plan (`components/yard-plan.tsx`, generated by `blender/yard/scripts/make_yard_plan.py` from `blender/yard/yard_layout.json`): original schematic drawn from the annotated layout; the imagery itself is not reproduced. Captioned "Schematic site plan … Approximate scale; buildings simplified" and "placement in the ship building area is illustrative"; opens larger in a dialog. Lourdes is drawn to scale from the GA deck outline (52.68 × 12.50 m, with the stowed ramp and the deckhouse footprint) centred in the area: 7.41 m clear at each end, 3.75 m each side. The water is labelled only "River" and the open ground "Open yard area" (the layout names neither).
 - Ship building area view: `public/images/yard/yard-berth-*.webp`, Lourdes on keel blocks inside the marked area, captioned as an illustration.
 - **Needs input:** the river's name (the plan no longer shows "Zuari", YD-4); the containers' "6×6" reading and unit (YD-1); the blasting shed's exact position and whether it exists yet (YD-2); which other structures belong to the yard and what the basin is for (YD-6); the exact yard coordinates (RM-1).
@@ -76,7 +90,7 @@ No other yard facts (plot area, cranes, slipway type, workforce) are published.
 Intended operating regions: the Mediterranean, the west coast of Africa, Asia and the Indian Ocean, from Goa. The routes are **illustrative, not confirmed sailing routes**, and the map says so in its caption.
 
 - Map: `components/route-map.tsx` (inline overlay) over `public/images/route/base-map.svg`, both generated by `scripts/create-route-map.py` from Natural Earth land (1:50m drawn; 1:10m land and minor islands used to check that every route stays at sea). Natural Earth is public domain and is credited on the map. Coastlines only, no country borders (RM-3).
-- Origin marker: "Goa · Fomar, Shiroda / BNBSBD shipyard / Lourdes will be built here", placed at the Shiroda reference point 15.329 N 74.027 E; the exact yard coordinates are not known (RM-1).
+- Origin marker: "Goa · Fomar, Shiroda / BNBSBD shipyard / LOURDES newbuild programme" (until 13 Oct: "Lourdes will be built here"), placed at the Shiroda reference point 15.329 N 74.027 E; the exact yard coordinates are not known (RM-1).
 - Lanes and end points are illustrative choices (RM-2): via Suez to the Mediterranean; via Suez, the Mediterranean and Gibraltar to West Africa (the Cape route is an equally plausible alternative); round Sri Lanka and through Malacca to Asia; south-west into the Indian Ocean. End points are positions at sea, not ports.
 - Animation-ready: each route is a separate `<path id="route-…" pathLength="1">`; how to animate it is described at the top of `route-map.tsx`. Not animated yet.
 
@@ -105,6 +119,7 @@ Never published: the midship drawing; the third-party satellite imagery of the y
 
 ## 6. Honesty status at publication
 
-- Verified from drawings or briefs: the Lourdes particulars and drawing views; the berth and blasting-shed dimensions as annotated.
+- Verified from drawings or briefs: the LOURDES particulars and drawing views; the berth and blasting-shed dimensions as annotated.
+- Owner instruction (13 Oct 2026): the model name BNB SHOREBRIDGE 55 and its four-line block, the nominal 55, the cargo payload 610 t (not on the GA), the status "Current newbuild programme", the BV wording "Under Bureau Veritas (BV) classification" and the 400–500 DWT design-to-order invitation.
 - Illustration: the hero poster, the 3D model, the scroll story, the yard renders, the schematic site plan and the route map. Machinery and bridge equipment in the explanatory views are representative.
-- Needs input (see SOURCE_CONFLICTS.md): crew count, Lourdes livery, beach-landing mechanism, status wording (WEB-1), the GA drawing number (INT-8), what BNBSBD stands for (INT-9), the containers reading (YD-1), the river name (YD-4), yard structures (YD-2, YD-6), yard coordinates and intended lanes (RM-1, RM-2).
+- Needs input (see SOURCE_CONFLICTS.md): crew count, LOURDES livery, beach-landing mechanism, the basis of the 610 t payload against the GA's 800 t maximum loading capacity (SB-2), a deadweight figure if one should be shown (SB-3), the GA drawing number (INT-8), what BNBSBD stands for (INT-9), the containers reading (YD-1), the river name (YD-4), yard structures (YD-2, YD-6), yard coordinates and intended lanes (RM-1, RM-2).

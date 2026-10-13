@@ -1,15 +1,27 @@
 /**
- * Single source for the website's copy and specifications. The site presents Lourdes only.
+ * Single source for the website's copy and specifications. The site presents one vessel: LOURDES, the reference
+ * newbuild of the BNB SHOREBRIDGE 55 (owner's presentation email and answers, 13 Oct 2026).
  *
- * Honesty rules (PROJECT_SPEC section 10): Lourdes particulars come from the Nirmon general
- * arrangement, Rev 0, 07.10.2026 (the drawing number is not published: the file name and the title block
- * disagree, SOURCE_CONFLICTS INT-8). Shipyard figures are the dimensions annotated on our yard plan.
- * Renders, site plans and route maps are labelled as illustrations. No crew number, prices, certification
- * or demonstrated performance are published.
+ * Naming: BNB SHOREBRIDGE 55 is the commercial model name (SHOREBRIDGE = the landing craft / cargo Ro-Ro series,
+ * 55 = the model's nominal length in metres); LOURDES is the individual vessel's name. The model name is kept apart
+ * from the measured particulars, which follow the general arrangement (52.68 m overall with ramp).
+ *
+ * Honesty rules (PROJECT_SPEC section 10): LOURDES particulars come from the Nirmon general arrangement, Rev 0,
+ * 07.10.2026 (the drawing number is not published: the file name and the title block disagree, SOURCE_CONFLICTS
+ * INT-8). The one exception is the cargo payload, 610 t, an owner-supplied figure that is not on the GA; the page
+ * labels it "Company figure" (SOURCE_CONFLICTS SB-2). No deadweight figure was supplied, so none is published,
+ * and 800 t stays "maximum loading capacity" as the GA labels it. Shipyard figures are the dimensions annotated
+ * on our yard plan. Renders, site plans and route maps are labelled as illustrations. No crew number, prices,
+ * certification or demonstrated performance are published.
+ * The 400–500 DWT design-to-order card is an invitation to enquire, not a design: no model number, specifications or
+ * picture.
  */
+
+import type { EnquiryInterest } from "@/lib/enquiry";
 
 export type Figure = { value: string; unit?: string; label: string };
 export type SpecRow = { label: string; value: string; note?: string };
+export type SpecGroup = { id: string; title: string; rows: SpecRow[] };
 
 export type StoryChapter = {
   id: string;
@@ -80,7 +92,29 @@ export const brand = {
   yard: "Fomar, Shiroda, Goa",
 };
 
-/* ------------------------------------------------------------------ Lourdes */
+/* ------------------------------------------------------------------ BNB SHOREBRIDGE 55 / LOURDES */
+
+/**
+ * The model block, presented exactly as the owner's email sets it out (four lines, in this order). The range card
+ * renders these four strings as they are; the hero and the specifications use the same values.
+ */
+export const shorebridge55 = {
+  model: "BNB SHOREBRIDGE 55",
+  descriptor: "55-metre Landing Craft / Cargo Ro-Ro",
+  vessel: "LOURDES",
+  referenceLabel: "Reference newbuild",
+  statusLabel: "Status",
+  status: "Current newbuild programme",
+  /** owner wording, 13 Oct 2026 */
+  classification: "Under Bureau Veritas (BV) classification",
+  /** the exact four-line block */
+  lines: [
+    "BNB SHOREBRIDGE 55",
+    "55-metre Landing Craft / Cargo Ro-Ro",
+    "Reference newbuild: LOURDES",
+    "Status: Current newbuild programme",
+  ],
+} as const;
 
 /** 16:9 still in the story's own light (graphite hull): story poster before the frames load, 3D fallback */
 const posterRender = {
@@ -88,7 +122,7 @@ const posterRender = {
   srcSet: "/images/lourdes-poster-960.webp 960w, /images/lourdes-poster-1600.webp 1600w",
   width: 1600,
   height: 900,
-  alt: "Lourdes at sea, design visualisation",
+  alt: "LOURDES, the BNB SHOREBRIDGE 55 reference newbuild, at sea; design visualisation",
   caption: "Design visualisation",
   treatment: "photo",
 } satisfies Poster & { caption: string };
@@ -98,7 +132,7 @@ const posterSketch = {
   srcSet: "/images/lourdes-hero-960.webp 960w, /images/lourdes-hero-1600.webp 1600w",
   width: 1600,
   height: 900,
-  alt: "Lourdes design illustration with the bow ramp lowered",
+  alt: "LOURDES, the BNB SHOREBRIDGE 55 reference newbuild, design illustration with the bow ramp lowered",
   caption: "Design visualisation",
   treatment: "sketch",
 } satisfies Poster & { caption: string };
@@ -123,7 +157,7 @@ const heroRender = {
     width: 1080,
     height: 1920,
   },
-  alt: "Lourdes at sea, design visualisation",
+  alt: "LOURDES, the BNB SHOREBRIDGE 55 reference newbuild, at sea; design visualisation",
   caption: "Design visualisation",
   treatment: "photo",
 } satisfies Poster & { caption: string };
@@ -133,36 +167,64 @@ const lourdesHero: Poster & { caption: string } = assets.lourdesPoster ? heroRen
 
 export const lourdes = {
   name: "LOURDES",
-  type: "Ro-Ro / landing craft",
-  status: "To be built · Fomar, Shiroda",
-  edition: "Bennet and Bernard / Our first vessel",
+  /** hero eyebrow: where the model sits in the company's vessel ranges */
+  // no-break space after "&": a narrow screen breaks before "& Cargo Ro-Ro", never after the ampersand
+  eyebrow: "Commercial Vessels · Landing Craft &\u00a0Cargo Ro-Ro",
+  /** shown beside the capabilities heading */
   tagline: "Cargo capability. Coastal access. Cyber resilience.",
   hero: lourdesHero,
   heroFigures: [
     { value: "52.68", unit: "m", label: "Overall length, with ramp" },
     { value: "24", unit: "TEU", label: "Nominal container capacity" },
+    { value: "610", unit: "t", label: "Cargo payload" },
     { value: "800", unit: "t", label: "Maximum loading capacity" },
-    { value: "BV", label: "Bureau Veritas classification" },
   ] satisfies Figure[],
   specsIntro:
-    "A Ro-Ro / landing craft for cargo through ports and permitted beach landing sites. Lourdes will be built under Bureau Veritas classification at our shipyard in Fomar, Shiroda, Goa.",
-  specsSource: "Particulars follow the Nirmon general arrangement, Rev 0, dated 07 October 2026.",
-  specs: [
-    { label: "Vessel type", value: "Ro-Ro / landing craft" },
-    { label: "Overall length, including ramp", value: "52.68\u00a0m" },
-    { label: "Hull length overall", value: "51.00\u00a0m" },
-    { label: "Breadth / depth / draft", value: "12.50 / 4.00 / 2.70\u00a0m" },
-    { label: "Nominal container capacity", value: "24\u00a0TEU", note: "Five bays of four 20\u00a0ft containers, plus four on the aft bay" },
-    { label: "Maximum loading capacity", value: "800\u00a0t" },
-    { label: "Main engines", value: "2 × 600\u00a0BHP" },
-    { label: "Design speed, approximate", value: "10\u00a0knots" },
-    { label: "Hull design basis", value: "Sea state 5", note: "As stated on the general arrangement" },
-    { label: "Flag", value: "Malta" },
-    { label: "Classification", value: "Bureau Veritas (BV)", note: "To be built to BV class" },
-    { label: "Cyber resilience", value: "Notation in scope", note: "Not yet certified" },
-    { label: "Build yard", value: "BNBSBD shipyard", note: "Fomar, Shiroda, Goa" },
-    { label: "Project status", value: "To be built", note: "At our shipyard in Fomar, Shiroda" },
-  ] satisfies SpecRow[],
+    "A 55-metre landing craft / cargo Ro-Ro, designed for cargo through ports and permitted beach landing sites. Its reference newbuild, LOURDES, is our current newbuild programme at our shipyard in Fomar, Shiroda, Goa, under Bureau Veritas (BV) classification.",
+  /** 55 is a nominal figure: say so beside the measured particulars */
+  specsNominal:
+    "55 is the model’s nominal length in metres. The measured particulars below are those of LOURDES and follow the general arrangement: 52.68\u00a0m overall with the ramp, 51.00\u00a0m hull.",
+  specsSource:
+    "Particulars follow the Nirmon general arrangement, Rev 0, dated 07 October 2026, except where a row notes otherwise.",
+  specGroups: [
+    {
+      id: "identity",
+      title: "Model and vessel",
+      rows: [
+        { label: "Model", value: shorebridge55.model, note: "SHOREBRIDGE series · 55 = nominal length in metres" },
+        { label: "Vessel", value: "LOURDES", note: "Reference newbuild" },
+        { label: "Type", value: "Landing craft / cargo Ro-Ro" },
+        { label: "Status", value: shorebridge55.status },
+        { label: "Build yard", value: "BNBSBD shipyard", note: "Fomar, Shiroda, Goa" },
+      ],
+    },
+    {
+      id: "particulars",
+      title: "Particulars",
+      rows: [
+        { label: "Length overall, including ramp", value: "52.68\u00a0m" },
+        { label: "Hull length overall", value: "51.00\u00a0m" },
+        { label: "Breadth", value: "12.50\u00a0m" },
+        { label: "Depth", value: "4.00\u00a0m" },
+        { label: "Draft", value: "2.70\u00a0m" },
+        { label: "Maximum loading capacity", value: "800\u00a0t" },
+        { label: "Cargo payload", value: "610\u00a0t", note: "Company figure; not stated on the general arrangement" },
+        { label: "Nominal container capacity", value: "24\u00a0TEU", note: "Five bays of four 20\u00a0ft containers, plus four on the aft bay" },
+        { label: "Main engines", value: "2 × 600\u00a0BHP" },
+        { label: "Speed, approximate", value: "10\u00a0knots" },
+        { label: "Hull design basis", value: "Sea state 5", note: "Hull designed for sea state 5, as stated on the general arrangement" },
+        { label: "Flag", value: "Malta" },
+      ],
+    },
+    {
+      id: "classification",
+      title: "Classification",
+      rows: [
+        { label: "Classification", value: shorebridge55.classification },
+        { label: "Cyber resilience", value: "Notation in scope", note: "Not yet certified" },
+      ],
+    },
+  ] satisfies SpecGroup[],
   capabilities: [
     {
       id: "roro-access",
@@ -177,16 +239,18 @@ export const lourdes = {
     {
       id: "cyber-resilience",
       title: "Cyber resilience.",
-      body: "A cyber-resilience notation is in scope for Lourdes, with onboard protections designed to address modern cyber threats and support digital security and operational resilience.",
+      body: "A cyber-resilience notation is in scope for LOURDES, with onboard protections designed to address modern cyber threats and support digital security and operational resilience.",
       status: "Notation in scope",
     },
   ],
 };
 
 export const drawings = {
+  // no-break space after the slash: a narrow screen breaks before "/ Drawings", never leaving the slash at a line end
+  eyebrow: "BNB SHOREBRIDGE 55 · LOURDES /\u00a0Drawings",
   title: "THE DRAWINGS.",
   intro:
-    "Explore the vessel in 3D or study the general arrangement. The GA views are taken directly from the Nirmon general arrangement, Rev 0, 07 October 2026.",
+    "Explore LOURDES, the BNB SHOREBRIDGE 55 reference newbuild, in 3D, or study her general arrangement. The GA views are taken directly from the Nirmon general arrangement, Rev 0, 07 October 2026.",
   model: {
     src: "/models/lourdes.glb",
     /** transparent still of the live 3D view (same framing and light), shown while it loads and without WebGL */
@@ -195,7 +259,7 @@ export const drawings = {
       srcSet: "/images/lourdes-3d-still-960.webp 960w, /images/lourdes-3d-still-1600.webp 1600w",
       width: 1600,
       height: 825,
-      alt: "Lourdes 3D model, three-quarter view from the bow, design visualisation",
+      alt: "LOURDES (BNB SHOREBRIDGE 55) 3D model, three-quarter view from the bow, design visualisation",
     },
     caption: "Interactive 3D / Design visualisation, not a construction model",
   },
@@ -209,7 +273,7 @@ export const drawings = {
       height: 835,
       fullWidth: 5143,
       fullHeight: 1789,
-      alt: "Lourdes outboard profile from the Nirmon general arrangement dated 07 October 2026",
+      alt: "LOURDES outboard profile from the Nirmon general arrangement dated 07 October 2026",
       caption: "General arrangement / Outboard profile / 07 October 2026",
     },
     {
@@ -221,7 +285,7 @@ export const drawings = {
       height: 552,
       fullWidth: 5150,
       fullHeight: 1184,
-      alt: "Lourdes main deck plan with the 24\u00a0TEU cargo arrangement from the Nirmon general arrangement",
+      alt: "LOURDES main deck plan with the 24\u00a0TEU cargo arrangement from the Nirmon general arrangement",
       caption: "General arrangement / Main deck plan / 07 October 2026",
     },
   ],
@@ -231,8 +295,10 @@ export const lourdesStory: Story = {
   id: "lourdes",
   manifest: "/sequences/lourdes/manifest.json",
   frames: 360,
-  eyebrow: "Lourdes / The vessel in layers",
-  title: "Lourdes, revealed",
+  /** the vessel this story shows; kept as short as the pre-13 Oct label so the top bar keeps its geometry at every
+   * width (the model name leads the hero just above, and the story's screen-reader title names both) */
+  eyebrow: "LOURDES / The vessel in layers",
+  title: "BNB SHOREBRIDGE 55 · LOURDES, revealed",
   status: "Design visualisation",
   poster: lourdesPoster,
   scrollPoster: lourdesHero,
@@ -244,10 +310,10 @@ export const lourdesStory: Story = {
       id: "arrival",
       label: "Arrival",
       title: "Built for the journey ahead.",
-      body: "A 52.68\u00a0m Ro-Ro landing craft with an open cargo deck, an aft deckhouse and a working bow ramp. Practical proportions for ports and permitted beach landings.",
+      body: "A 52.68\u00a0m landing craft / cargo Ro-Ro with an open deck, an aft deckhouse and a working bow ramp. Practical proportions for ports and permitted beach landings.",
       start: 1,
       end: 69,
-      alt: "Lourdes at sea in calm water, seen first in side profile and then from a three-quarter bow view.",
+      alt: "LOURDES at sea in calm water, seen first in side profile and then from a three-quarter bow view.",
       fact: { value: "52.68", unit: "m", label: "Overall length, with ramp" },
     },
     {
@@ -275,58 +341,103 @@ export const lourdesStory: Story = {
       id: "systems",
       label: "Systems",
       title: "Connected. Cyber-resilient.",
-      body: "The structure settles back into place, and the wheelhouse brings navigation and communications together above the deckhouse. Lourdes will be built under Bureau Veritas classification, with a cyber-resilience notation in scope.",
+      body: "The structure settles back into place, and the wheelhouse brings navigation and communications together above the deckhouse. LOURDES is under Bureau Veritas (BV) classification, with a cyber-resilience notation in scope.",
       start: 231,
       end: 299,
       alt: "The structure and the deckhouse levels settle back into place while the camera moves to the wheelhouse, mast and antennas.",
-      fact: { value: "BV", label: "Bureau Veritas classification" },
+      fact: { value: "BV", label: shorebridge55.classification },
       note: "Bridge equipment shown is representative.",
     },
     {
       id: "reassembly",
       label: "Reassembly",
       title: "Whole again, and ready.",
-      body: "The ramp closes and the sea comes back: the complete vessel, as she will be built at our shipyard in Fomar, Shiroda.",
+      body: "The ramp closes and the sea comes back: LOURDES complete, the reference newbuild of the BNB SHOREBRIDGE 55.",
       start: 300,
       end: 360,
       alt: "The bow ramp closes, the sea returns and the camera finishes on a three-quarter view of the complete vessel.",
       fact: { value: "800", unit: "t", label: "Maximum loading capacity" },
-      link: { href: "#shipyard", label: "Where Lourdes will be built" },
+      link: { href: "#shipyard", label: "Our shipyard, home of the newbuild" },
     },
   ],
 };
+
+/* ------------------------------------------------------------------ Commercial vessels */
+
+/**
+ * "Commercial Vessels → Landing Craft & Cargo Ro-Ro": the range section and the header menu. Card 1 is the model
+ * block (shorebridge55.lines, exactly as written); card 2 invites design-to-order enquiries and is text only: no
+ * model number, no specifications, no picture (it is not a design).
+ */
+export const vesselRange = {
+  id: "landing-craft-roro",
+  category: "Commercial Vessels",
+  name: "Landing Craft & Cargo Ro-Ro",
+  convention:
+    "SHOREBRIDGE is our landing craft and cargo Ro-Ro series. The number in a model’s name is its nominal length in metres, and every vessel carries her own name.",
+  model: {
+    id: "shorebridge-55",
+    /**
+     * The model's enquiry action (range card and hero): preselects "BNB SHOREBRIDGE 55 / LOURDES" in the contact form
+     * (enquiryTopics). No-break spaces keep the model name on one line when the button wraps on a phone.
+     */
+    enquire: { label: `Enquire about the ${shorebridge55.model.replace(/ /g, "\u00a0")}`, href: "#enquire-shorebridge-55" },
+    links: [
+      { href: "#lourdes-story", label: "The vessel in layers" },
+      { href: "#specifications", label: "Specifications" },
+    ],
+  },
+  designToOrder: {
+    id: "design-to-order",
+    title: "400–500\u00a0DWT Landing Craft — Design-to-Order Enquiries Welcome",
+    body: "Tell us about your cargo, route and operating requirements.",
+    note: "Configuration and specifications subject to engineering feasibility and applicable approvals.",
+    cta: "Enquire about design to order",
+    href: "#enquire-design-to-order",
+  },
+};
+
+/**
+ * Deep links into the contact form. Each id is an anchor at the top of the contact section; arriving on it, or
+ * following a link to it, preselects the matching "Enquiry about" subject (components/contact-section.tsx).
+ */
+export const enquiryTopics: { id: string; interest: EnquiryInterest }[] = [
+  { id: "enquire-shorebridge-55", interest: "BNB SHOREBRIDGE 55 / LOURDES" },
+  { id: "enquire-design-to-order", interest: "400–500 DWT design-to-order landing craft" },
+  { id: "enquire-shipyard", interest: "Shipyard / general" },
+];
 
 /* ------------------------------------------------------------------ Shipyard */
 
 export const shipyard = {
   eyebrow: "BNBSBD / Our shipyard",
   title: "Our shipyard at Fomar, Shiroda, Goa.",
-  status: "Lourdes · To be built here",
-  lead: "Lourdes will be built at our own shipyard on the waterfront at Fomar, Shiroda, in Goa. The 67.5\u00a0m × 20\u00a0m ship building area on the quay takes the full 52.68\u00a0m vessel with room to spare.",
-  /** hero visual of the section (illustration; SOURCE_CONFLICTS YD-8: Lourdes is shown as she will be built) */
+  status: "Home of the LOURDES newbuild programme",
+  lead: "Our own shipyard on the waterfront at Fomar, Shiroda, in Goa, is the home of the LOURDES newbuild programme. The 67.5\u00a0m × 20\u00a0m ship building area on the quay takes the full 52.68\u00a0m vessel with room to spare.",
+  /** hero visual of the section (illustration; SOURCE_CONFLICTS YD-8: LOURDES is shown complete, so the captions say so) */
   render: {
     src: "/images/yard/yard-hero-1600.webp",
     srcSet: "/images/yard/yard-hero-960.webp 960w, /images/yard/yard-hero-1600.webp 1600w",
     width: 1600,
     height: 900,
-    alt: "Illustration: aerial view of our shipyard at Fomar, Shiroda, Goa, with Lourdes on keel blocks inside the 67.5\u00a0m by 20\u00a0m ship building area beside the waterfront quay, the yard buildings and a walled basin behind",
-    caption: "Illustration / Our shipyard at Fomar, Shiroda, with Lourdes in the ship building area (to be built)",
+    alt: "Illustration: aerial view of our shipyard at Fomar, Shiroda, Goa, with LOURDES shown complete on keel blocks inside the 67.5\u00a0m by 20\u00a0m ship building area beside the waterfront quay, the yard buildings and a walled basin behind",
+    caption: "Illustration / Our shipyard at Fomar, Shiroda, with LOURDES shown complete in the ship building area",
   },
   berthView: {
     src: "/images/yard/yard-berth-1600.webp",
     srcSet: "/images/yard/yard-berth-960.webp 960w, /images/yard/yard-berth-1600.webp 1600w",
     width: 1600,
     height: 900,
-    alt: "Illustration: Lourdes on keel blocks and side shores inside the marked ship building area on the quay, seen from the waterside",
-    caption: "Illustration / Lourdes in the ship building area (to be built)",
+    alt: "Illustration: LOURDES, shown complete, on keel blocks and side shores inside the marked ship building area on the quay, seen from the waterside",
+    caption: "Illustration / LOURDES shown complete in the ship building area",
   },
   planTitle: "Site plan",
   factsTitle: "The yard in figures",
   facts: [
     { label: "Ship building area", value: "67.5 × 20\u00a0m", note: "1,350\u00a0m², on the waterfront quay" },
     { label: "Blasting shed", value: "10 × 12\u00a0m" },
-    { label: "Lourdes", value: "52.68 × 12.50\u00a0m", note: "Length overall with ramp × breadth" },
-    { label: "Room around Lourdes", value: "14.82\u00a0m / 7.50\u00a0m", note: "In length / in breadth: 7.41\u00a0m at each end and 3.75\u00a0m each side when centred" },
+    { label: "LOURDES", value: "52.68 × 12.50\u00a0m", note: "Length overall with ramp × breadth" },
+    { label: "Room around LOURDES", value: "14.82\u00a0m / 7.50\u00a0m", note: "In length / in breadth: 7.41\u00a0m at each end and 3.75\u00a0m each side when centred" },
   ] satisfies SpecRow[],
   source: "Berth and shed dimensions as annotated on our yard plan. The site plan and renders are illustrations, not survey drawings.",
 };
@@ -336,7 +447,7 @@ export const shipyard = {
 export const routes = {
   eyebrow: "Route of operation",
   title: "From Goa, to a wider horizon.",
-  body: "From our shipyard in Goa, Lourdes is intended to operate across the Mediterranean, the west coast of Africa, Asia and the Indian Ocean.",
+  body: "From our shipyard in Goa, LOURDES is intended to operate across the Mediterranean, the west coast of Africa, Asia and the Indian Ocean.",
   origin: { label: "From", value: "Goa, India" },
   regions: [
     { id: "mediterranean", name: "Mediterranean" },
@@ -351,11 +462,11 @@ export const routes = {
 /* ------------------------------------------------------------------ Company */
 
 export const company = [
-  { eyebrow: "01 / Shipbuilding", title: "BNBSBD.", body: "The shipbuilding brand of Bennet and Bernard Subsea. Lourdes is our first vessel." },
-  { eyebrow: "02 / Fomar, Shiroda, Goa", title: "OUR SHIPYARD.", body: "Our shipyard on the waterfront at Fomar, Shiroda, in Goa, with a 67.5\u00a0m × 20\u00a0m ship building area on the quay. Lourdes will be built here." },
-  { eyebrow: "03 / Our team", title: "OUR SHIPBUILDER.", body: "Our own shipbuilder brings the expertise to build and deliver Lourdes, under Bureau Veritas classification." },
+  { eyebrow: "01 / Shipbuilding", title: "BNBSBD.", body: "The shipbuilding brand of Bennet and Bernard Subsea. Our first vessel is LOURDES, the reference newbuild of the BNB SHOREBRIDGE 55." },
+  { eyebrow: "02 / Fomar, Shiroda, Goa", title: "OUR SHIPYARD.", body: "Our shipyard on the waterfront at Fomar, Shiroda, in Goa, with a 67.5\u00a0m × 20\u00a0m ship building area on the quay: the home of the LOURDES newbuild programme." },
+  { eyebrow: "03 / Our team", title: "OUR SHIPBUILDER.", body: "Our own shipbuilder brings the expertise to build and deliver LOURDES, under Bureau Veritas (BV) classification." },
 ];
 
 export const contactCopy = {
-  body: "Discuss Lourdes, a vessel project or our shipyard at Fomar, Shiroda.",
+  body: "Ask about the BNB SHOREBRIDGE 55 and LOURDES, our current newbuild programme. Design-to-order enquiries for a 400–500\u00a0DWT landing craft are welcome, as are questions about our shipyard at Fomar, Shiroda.",
 };

@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { HomeExperience } from "@/components/maritime";
 
 export const metadata: Metadata = {
-  title: "Lourdes — Ro-Ro / Landing Craft",
+  title: "BNB SHOREBRIDGE 55 — Landing Craft / Cargo Ro-Ro",
   description:
-    "Lourdes: our 52.68 m Ro-Ro / landing craft with 24 TEU nominal capacity and beach landing capability, with a cyber-resilience notation in scope. To be built under Bureau Veritas classification at our shipyard in Fomar, Shiroda, Goa.",
+    "BNB SHOREBRIDGE 55, our 55-metre landing craft / cargo Ro-Ro. Reference newbuild LOURDES: 52.68 m overall with ramp, 24 TEU nominal, 610 t cargo payload, beach landing capability; current newbuild programme at our shipyard in Fomar, Shiroda, Goa, under Bureau Veritas (BV) classification. 400–500 DWT design-to-order enquiries welcome.",
 };
 
 export default function Home() {

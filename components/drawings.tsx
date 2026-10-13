@@ -15,13 +15,13 @@ export function Drawings() {
       <div className="wrap">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">Lourdes / Drawings</p>
+            <p className="eyebrow">{drawings.eyebrow}</p>
             <h2 id="drawings-title">{drawings.title}</h2>
           </div>
           <p>{drawings.intro}</p>
         </div>
         <Tabs value={tab} onValueChange={setTab} className="drawings-tabs">
-          <TabsList className="view-list" aria-label="Lourdes views">
+          <TabsList className="view-list" aria-label="LOURDES views">
             <TabsTrigger value="model" className="view-tab">
               Interactive 3D
             </TabsTrigger>
@@ -33,7 +33,7 @@ export function Drawings() {
           </TabsList>
           <TabsContent value="model" className="drawing-panel">
             <figure className="drawing-stage drawing-stage--model">
-              <GlbViewer src={drawings.model.src} poster={drawings.model.poster} label="Interactive 3D model of Lourdes. Drag to turn the vessel." />
+              <GlbViewer src={drawings.model.src} poster={drawings.model.poster} label="Interactive 3D model of LOURDES, the BNB SHOREBRIDGE 55 reference newbuild. Drag to turn the vessel." />
               <figcaption>{drawings.model.caption}</figcaption>
             </figure>
           </TabsContent>
@@ -53,7 +53,7 @@ export function Drawings() {
                       </button>
                     </DialogTrigger>
                     <DialogContent className="drawing-dialog">
-                      <DialogTitle>Lourdes / {v.label}</DialogTitle>
+                      <DialogTitle>LOURDES / {v.label}</DialogTitle>
                       <DialogDescription>{v.caption}</DialogDescription>
                       <div className="drawing-dialog-image">
                         <img src={v.full} alt={v.alt} width={v.fullWidth} height={v.fullHeight} decoding="async" />

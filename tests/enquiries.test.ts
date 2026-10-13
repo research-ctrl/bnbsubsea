@@ -5,15 +5,16 @@ const { put } = vi.hoisted(() => ({ put: vi.fn() }));
 vi.mock("@vercel/blob", () => ({ put }));
 
 import enquiries from "../api/enquiries";
-import { UNAVAILABLE_MESSAGE } from "../lib/enquiry";
+import { ENQUIRY_INTERESTS, INVALID_FIELDS_MESSAGE, INVALID_INTEREST_MESSAGE, UNAVAILABLE_MESSAGE } from "../lib/enquiry";
+import { enquiryTopics } from "../lib/site-content";
 
 const SITE = "https://bnb.example";
 const valid = {
   name: "Test Sender",
   email: "sender@example.com",
   organisation: "",
-  interest: "Shipbuilding",
-  message: "A test enquiry about Lourdes.",
+  interest: "BNB SHOREBRIDGE 55 / LOURDES",
+  message: "A test enquiry about LOURDES.",
   website: "",
 };
 
@@ -52,7 +53,7 @@ describe("POST /api/enquiries", () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     vi.setSystemTime(new Date("2026-10-12T16:20:05.123Z"));
 
-    const { status, body } = await send(post({ ...valid, name: "  Test Sender  ", message: "  A test enquiry about Lourdes.  " }));
+    const { status, body } = await send(post({ ...valid, name: "  Test Sender  ", message: "  A test enquiry about LOURDES.  " }));
 
     expect(status).toBe(201);
     expect(body.reference).toMatch(/^[0-9A-F]{8}$/);
@@ -73,9 +74,30 @@ describe("POST /api/enquiries", () => {
       name: "Test Sender",
       email: "sender@example.com",
       organisation: "",
-      interest: "Shipbuilding",
-      message: "A test enquiry about Lourdes.",
+      interest: "BNB SHOREBRIDGE 55 / LOURDES",
+      message: "A test enquiry about LOURDES.",
     });
+  });
+
+  it("offers exactly the three subjects of the contact form", () => {
+    expect(ENQUIRY_INTERESTS).toEqual(["BNB SHOREBRIDGE 55 / LOURDES", "400–500 DWT design-to-order landing craft", "Shipyard / general"]);
+  });
+
+  it.each(ENQUIRY_INTERESTS.map((interest) => [interest]))("accepts and stores the subject %s", async (interest) => {
+    const { status } = await send(post({ ...valid, interest }));
+    expect(status).toBe(201);
+    expect(JSON.parse(put.mock.calls[0][1]).interest).toBe(interest);
+  });
+
+  it("stores the retired subject Shipbuilding (sent by pages loaded before the new list) as Shipyard / general", async () => {
+    const { status } = await send(post({ ...valid, interest: "Shipbuilding" }));
+    expect(status).toBe(201);
+    expect(JSON.parse(put.mock.calls[0][1]).interest).toBe("Shipyard / general");
+  });
+
+  it("deep-links every enquiry topic to a subject the server accepts", () => {
+    expect(enquiryTopics.map((t) => t.interest).sort()).toEqual([...ENQUIRY_INTERESTS].sort());
+    for (const t of enquiryTopics) expect(t.id).toMatch(/^enquire-[a-z0-9-]+$/);
   });
 
   it("accepts a request without an Origin header", async () => {
@@ -95,13 +117,28 @@ describe("POST /api/enquiries", () => {
     ["an invalid email", { email: "not-an-email" }],
     ["an email over 254 characters", { email: `${"e".repeat(250)}@example.com` }],
     ["an organisation over 180 characters", { organisation: "O".repeat(181) }],
-    ["an unknown interest", { interest: "Drones" }],
     ["a message under 10 characters", { message: "Too short" }],
     ["a message over 5,000 characters", { message: "M".repeat(5001) }],
+    ["an invalid email and an unknown interest", { email: "not-an-email", interest: "Unknown" }],
   ])("rejects %s with 400", async (_label, change) => {
     const { status, body } = await send(post({ ...valid, ...change }));
     expect(status).toBe(400);
-    expect(body.error).toBe("Please enter a name, valid email and an enquiry of 10–5,000 characters.");
+    expect(body.error).toBe(INVALID_FIELDS_MESSAGE);
+    expect(put).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["an unknown interest", { interest: "Drones" }],
+    ["another retired interest", { interest: "Research collaboration" }],
+    ["no interest", { interest: "" }],
+    ["a missing interest", { interest: undefined }],
+    ["a non-string interest", { interest: 55 }],
+    ["an interest that only differs in case", { interest: "bnb shorebridge 55 / lourdes" }],
+    ["an inherited property name", { interest: "toString" }],
+  ])("rejects %s with 400 and asks for a reload", async (_label, change) => {
+    const { status, body } = await send(post({ ...valid, ...change }));
+    expect(status).toBe(400);
+    expect(body.error).toBe(INVALID_INTEREST_MESSAGE);
     expect(put).not.toHaveBeenCalled();
   });
 

@@ -6,7 +6,39 @@
  * Web-standard APIs only (Request, Response, crypto), so it runs unchanged in both places.
  */
 
-export const ENQUIRY_INTERESTS: readonly string[] = ["Shipbuilding", "Lourdes vessel programme", "Research collaboration"];
+/**
+ * The subjects a visitor can pick in the form's "Enquiry about" list, stored as written. The form renders exactly this
+ * list, so the browser and the server never disagree about what is allowed.
+ */
+export const ENQUIRY_INTERESTS = [
+  "BNB SHOREBRIDGE 55 / LOURDES",
+  "400–500 DWT design-to-order landing craft",
+  "Shipyard / general",
+] as const;
+export type EnquiryInterest = (typeof ENQUIRY_INTERESTS)[number];
+
+export function isEnquiryInterest(value: unknown): value is EnquiryInterest {
+  return typeof value === "string" && (ENQUIRY_INTERESTS as readonly string[]).includes(value);
+}
+
+/**
+ * Transition only: the form before 13 Oct 2026 always sent "Shipbuilding". A page left open from before the deployment
+ * of the new subject list still sends it, so the server accepts it and stores it under today's general subject rather
+ * than losing the enquiry. The form itself never offers it. Remove this once that deployment has been live for a few
+ * weeks (SOURCE_CONFLICTS SB-10).
+ */
+export const RETIRED_INTERESTS: Readonly<Record<string, EnquiryInterest>> = { Shipbuilding: "Shipyard / general" };
+
+/** The subject to store for a submitted value, or null when it is neither a current nor a retired subject. */
+export function storedInterest(value: unknown): EnquiryInterest | null {
+  if (isEnquiryInterest(value)) return value;
+  if (typeof value === "string" && Object.hasOwn(RETIRED_INTERESTS, value)) return RETIRED_INTERESTS[value];
+  return null;
+}
+
+export const INVALID_FIELDS_MESSAGE = "Please enter a name, valid email and an enquiry of 10–5,000 characters.";
+/** Only a page that does not offer the current list can send an unknown subject: reloading it fixes that. */
+export const INVALID_INTEREST_MESSAGE = "Please reload the page and choose what your enquiry is about.";
 
 /** Longest accepted request body, in characters of raw JSON (the message itself is limited to 5,000). */
 export const MAX_BODY_CHARS = 12_000;
@@ -97,7 +129,7 @@ export async function handleEnquiry(request: Request, store: EnquiryStore, now: 
     const name = typeof payload.name === "string" ? payload.name.trim() : "";
     const email = typeof payload.email === "string" ? payload.email.trim() : "";
     const organisation = typeof payload.organisation === "string" ? payload.organisation.trim() : "";
-    const interest = typeof payload.interest === "string" ? payload.interest : "";
+    const interest = storedInterest(payload.interest);
     const message = typeof payload.message === "string" ? payload.message.trim() : "";
     // honeypot: a field people never see, which form-filling bots do fill in
     if (payload.website) return reply({ error: "Your enquiry could not be received." }, 400);
@@ -107,12 +139,12 @@ export async function handleEnquiry(request: Request, store: EnquiryStore, now: 
       email.length > 254 ||
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
       organisation.length > 180 ||
-      !ENQUIRY_INTERESTS.includes(interest) ||
       message.length < 10 ||
       message.length > 5000
     ) {
-      return reply({ error: "Please enter a name, valid email and an enquiry of 10–5,000 characters." }, 400);
+      return reply({ error: INVALID_FIELDS_MESSAGE }, 400);
     }
+    if (!interest) return reply({ error: INVALID_INTEREST_MESSAGE }, 400);
     const reference = crypto.randomUUID().slice(0, 8).toUpperCase();
     const enquiry: StoredEnquiry = { reference, receivedAt: now().toISOString(), name, email, organisation, interest, message };
     await store(enquiryPathname(enquiry), JSON.stringify(enquiry, null, 2) + "\n");

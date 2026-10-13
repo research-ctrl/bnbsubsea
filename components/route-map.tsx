@@ -1,5 +1,5 @@
 /**
- * RouteMap: Lourdes route-of-operation map (illustrative).
+ * RouteMap: LOURDES route-of-operation map (illustrative).
  *
  * Server component (two small client helpers: MapPan for the phone layout, FallbackImage for a missing base
  * map). Two layers share one viewBox:
@@ -179,7 +179,7 @@ export function RouteMap({
       <div className="rm-canvas" style={{ aspectRatio: `${w} / ${h}` }}>
         <FallbackImage className="rm-base" src="/images/route/base-map.svg" alt="" width={w} height={h} loading="lazy" decoding="async" />
         <svg className="rm-overlay" viewBox={`0 0 ${w} ${h}`} role="img" aria-labelledby={`${titleId} ${descId}`}>
-          <title id={titleId}>Lourdes: illustrative route of operation from Goa</title>
+          <title id={titleId}>LOURDES: illustrative route of operation from Goa</title>
           <desc id={descId}>
             Map from the BNBSBD shipyard at Fomar, Shiroda, Goa, to the intended operating regions: the Mediterranean, the west
             coast of Africa, Asia and the Indian Ocean. The lines are illustrative connections, not confirmed sailing routes.
@@ -288,7 +288,7 @@ export function RouteMap({
                   BNBSBD SHIPYARD
                 </text>
                 <text className="rm-origin-sub" x={0} y={26}>
-                  LOURDES WILL BE BUILT HERE
+                  LOURDES NEWBUILD PROGRAMME
                 </text>
               </g>
             </g>

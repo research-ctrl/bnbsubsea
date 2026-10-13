@@ -2,9 +2,9 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: { default: "Bennet and Bernard Subsea | Lourdes, Ro-Ro / Landing Craft", template: "%s | Bennet and Bernard Subsea" },
+  title: { default: "Bennet and Bernard Subsea | BNB SHOREBRIDGE 55, Landing Craft / Cargo Ro-Ro", template: "%s | Bennet and Bernard Subsea" },
   description:
-    "Bennet and Bernard Subsea: Lourdes, our 52.68 m Ro-Ro / landing craft, to be built under Bureau Veritas classification at our shipyard in Fomar, Shiroda, Goa. Specifications, general arrangement, shipyard and route of operation.",
+    "Bennet and Bernard Subsea: the BNB SHOREBRIDGE 55 landing craft / cargo Ro-Ro and its reference newbuild LOURDES, our current newbuild programme at our shipyard in Fomar, Shiroda, Goa, under Bureau Veritas (BV) classification. Specifications, general arrangement, shipyard and route of operation.",
   icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
 };
 
@@ -27,6 +27,10 @@ const NOSCRIPT_CSS = [
   ".glb-message:not(.glb-message--noscript){display:none}",
 ].join("");
 
+/** Runs before hydration; a fragment that decodes cleanly (every real anchor) is left alone. */
+const DROP_MALFORMED_HASH =
+  "try{decodeURIComponent(location.hash)}catch(e){history.replaceState(history.state,'',location.pathname+location.search)}";
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
@@ -37,6 +41,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         {/* without JavaScript the scroll story cannot play: lay it out like its stills mode (picture, then every
             chapter), and drop the controls that need a script */}
         <noscript dangerouslySetInnerHTML={{ __html: `<style>${NOSCRIPT_CSS}</style>` }} />
+        {/* a malformed URL fragment (e.g. "/#100%") would make the page's anchor handling throw on load and replace
+            the page with an error screen: drop it before the page starts, so the visitor simply lands at the top */}
+        <script dangerouslySetInnerHTML={{ __html: DROP_MALFORMED_HASH }} />
       </head>
       <body>{children}</body>
     </html>
