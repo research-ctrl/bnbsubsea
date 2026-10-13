@@ -1,10 +1,9 @@
 import type { Poster } from "@/lib/site-content";
 
 /**
- * The Lourdes poster as a <picture>: a portrait-composed source for portrait screens (when the poster has one)
- * and the landscape srcSet otherwise. No hooks, so it renders in server and client components alike. The hero
- * and the story stage use the same markup and `sizes`, so the browser picks the same file for both (one
- * download).
+ * A poster as a <picture>: a portrait-composed source for portrait screens (when the poster has one) and the
+ * landscape srcSet otherwise. No hooks, so it renders in server and client components alike. Used by the hero
+ * (the owner's cover image) and the story stage (its own render).
  */
 export function PosterPicture({
   poster,

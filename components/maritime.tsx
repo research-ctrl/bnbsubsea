@@ -38,14 +38,18 @@ function LabelledLine({ label, value, className }: { label: string; value: strin
  * Hero: leads with the model (owner's email, 13 Oct 2026). The title block reads, in order: BNB SHOREBRIDGE 55 /
  * 55-metre Landing Craft / Cargo Ro-Ro / Reference newbuild: LOURDES / Status: Current newbuild programme. The
  * classification is a separate tag; the figures are GA values plus the owner's cargo payload.
+ * The cover picture sits in `.hero-stage`, a full-bleed box that runs from the top of the hero down to the title,
+ * so the CSS can keep the vessel above the title at any screen size.
  */
 function LourdesHero() {
   const p = lourdes.hero;
   return (
-    <section className={"hero" + (p.treatment === "sketch" ? " hero--sketch" : "")} id="lourdes" aria-labelledby="hero-title">
-      <PosterPicture poster={p} className="hero-media" priority />
+    <section className="hero" id="lourdes" aria-labelledby="hero-title">
       <div className="hero-shade" aria-hidden="true" />
       <div className="wrap hero-inner">
+        <div className="hero-stage">
+          <PosterPicture poster={p} className="hero-media" priority />
+        </div>
         <div className="hero-top">
           <p className="eyebrow eyebrow--light">{lourdes.eyebrow}</p>
           <span className="tag tag--dark">{shorebridge55.classification}</span>

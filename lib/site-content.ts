@@ -67,7 +67,7 @@ export type Story = {
   status: string;
   /** stills mode and failure fallback (16:9) */
   poster: Poster;
-  /** under the canvas in scroll mode: the hero picture (same file as the hero, so no second download) */
+  /** under the canvas in scroll mode: a wider render in the story's own light, with a portrait-composed variant */
   scrollPoster?: Poster;
   disclaimer: string;
   /** one-line version kept visible on short phones, where the full disclaimer does not fit */
@@ -145,11 +145,10 @@ const posterSketch = {
 } satisfies Poster & { caption: string };
 
 /**
- * Hero: a 21:9 render (same light and paint as the story) with the vessel in the right half, so every
- * landscape crop keeps the bow and ramp; a portrait-composed render for phones (vessel in the upper part,
- * sea below the title).
+ * The story's picture under the canvas in scroll mode: a 21:9 render (same light and paint as the story's frames)
+ * with the vessel in the right half, and a portrait-composed render for portrait screens.
  */
-const heroRender = {
+const wideRender = {
   src: "/images/lourdes-poster-wide-1920.webp",
   srcSet:
     "/images/lourdes-poster-wide-1280.webp 1280w, /images/lourdes-poster-wide-1920.webp 1920w, /images/lourdes-poster-wide-2560.webp 2560w",
@@ -170,7 +169,33 @@ const heroRender = {
 } satisfies Poster & { caption: string };
 
 const lourdesPoster: Poster & { caption: string } = assets.lourdesPoster ? posterRender : posterSketch;
-const lourdesHero: Poster & { caption: string } = assets.lourdesPoster ? heroRender : posterSketch;
+const lourdesScrollPoster: Poster & { caption: string } = assets.lourdesPoster ? wideRender : posterSketch;
+
+/**
+ * Hero cover: the owner's image of BNB SHOREBRIDGE 55 under way (supplied 13 Oct 2026; 1672 x 941, downscaled only).
+ * Landscape screens get the whole frame: the vessel spans 39-98 % of its width, bow ramp at the right edge, so it
+ * is never cropped sideways; the hero CSS places it above the title (see `.hero-media`). Portrait screens get the
+ * frame from x = 560 px (1112 x 941), which holds the whole vessel at phone width, shown as a band above the title.
+ */
+const heroCover = {
+  src: "/images/shorebridge-55-cover-1600.webp",
+  srcSet:
+    "/images/shorebridge-55-cover-960.webp 960w, /images/shorebridge-55-cover-1280.webp 1280w, /images/shorebridge-55-cover-1600.webp 1600w",
+  // never wider than the viewport
+  sizes: "100vw",
+  width: 1600,
+  height: 900,
+  portrait: {
+    media: "(max-aspect-ratio: 4/5)",
+    srcSet: "/images/shorebridge-55-cover-portrait-720.webp 720w, /images/shorebridge-55-cover-portrait-1112.webp 1112w",
+    sizes: "100vw",
+    width: 1112,
+    height: 941,
+  },
+  alt: "BNB SHOREBRIDGE 55 under way at sea with white BENNET AND BERNARD SUBSEA containers; design visualisation",
+  caption: "Design visualisation",
+  treatment: "photo",
+} satisfies Poster & { caption: string };
 
 export const lourdes = {
   name: "LOURDES",
@@ -179,7 +204,7 @@ export const lourdes = {
   eyebrow: "Commercial Vessels · Landing Craft &\u00a0Cargo Ro-Ro",
   /** shown beside the capabilities heading */
   tagline: "Versatile cargo. Coastal access. Sea state 5. Cyber resilience.",
-  hero: lourdesHero,
+  hero: heroCover,
   heroFigures: [
     { value: "52.68", unit: "m", label: "Overall length, with ramp" },
     { value: "24", unit: "TEU", label: "Nominal container capacity" },
@@ -316,7 +341,7 @@ export const lourdesStory: Story = {
   title: "BNB SHOREBRIDGE 55 · LOURDES, revealed",
   status: "Design visualisation",
   poster: lourdesPoster,
-  scrollPoster: lourdesHero,
+  scrollPoster: lourdesScrollPoster,
   disclaimer:
     "Explanatory visualisation. The hull does not separate; internal structure is informed by the drawings, and equipment is representative.",
   disclaimerShort: "Explanatory visualisation · equipment representative",

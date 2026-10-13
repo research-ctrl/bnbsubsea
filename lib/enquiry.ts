@@ -2,8 +2,11 @@
  * POST /api/enquiries: the one implementation of the enquiry contract, used by
  * - production: the Vercel Function in api/enquiries.ts, which stores each enquiry in the private Vercel Blob store;
  * - local development: the dev-server middleware in vite.config.ts, which writes the same JSON to .dev-enquiries/.
+ * Both then copy the stored enquiry to the owner's lead sheet when LEADS_WEBHOOK_URL and LEADS_WEBHOOK_SECRET are set
+ * (forwardLead below; the receiving Google Apps Script is integrations/google-sheets-leads/Code.gs).
  * The contact form (components/contact-section.tsx) relies on these status codes and { error } / { reference } bodies.
- * Web-standard APIs only (Request, Response, crypto), so it runs unchanged in both places.
+ * Web-standard APIs only (Request, Response, crypto, fetch), so it runs unchanged in both places. It never reads
+ * process.env itself: the form imports this module too, so it is also part of the browser bundle.
  */
 
 /**
@@ -110,7 +113,121 @@ async function readBody(request: Request): Promise<string | null> {
   return new TextDecoder().decode(bytes);
 }
 
-export async function handleEnquiry(request: Request, store: EnquiryStore, now: () => Date = () => new Date()): Promise<Response> {
+/**
+ * The owner's lead sheet ("Website Leads — Let's Talk" in Google Sheets): a Google Apps Script web app that appends one
+ * row per enquiry (integrations/google-sheets-leads). The website holds no Google credentials, only the web app's URL
+ * and a shared secret that the script checks.
+ */
+export interface LeadsWebhook {
+  url: string;
+  secret: string;
+}
+
+/** The longest the visitor waits for the lead sheet. The enquiry is already stored by then; only the sheet row is at stake. */
+export const LEADS_WEBHOOK_TIMEOUT_MS = 5_000;
+
+const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1", "[::1]"]);
+
+/**
+ * The lead-sheet forward configured in `env` (LEADS_WEBHOOK_URL and LEADS_WEBHOOK_SECRET), or null when it is off.
+ * Callers pass their environment: process.env in the Vercel Function, Vite's loadEnv in local development.
+ * The URL turns it on; the secret is optional (sent only if set, for a script that checks a LEADS_SECRET property).
+ * No URL: off (logged if a secret is set without one). A URL that is not https:// (plain http only to this machine): off,
+ * and the misconfiguration is logged (never the secret).
+ */
+export function leadsWebhookFromEnv(env: Record<string, string | undefined>): LeadsWebhook | null {
+  const url = env.LEADS_WEBHOOK_URL?.trim() ?? "";
+  const secret = env.LEADS_WEBHOOK_SECRET?.trim() ?? "";
+  if (!url && !secret) return null;
+  const off = (reason: string) => {
+    console.error(`Lead sheet forward is off: ${reason}`);
+    return null;
+  };
+  if (!url) return off("LEADS_WEBHOOK_SECRET is set but LEADS_WEBHOOK_URL is not.");
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return off("LEADS_WEBHOOK_URL is not a URL.");
+  }
+  // the secret travels in the request body: never over plain http, except to a test server on this machine
+  if (parsed.protocol !== "https:" && !(parsed.protocol === "http:" && LOCAL_HOSTNAMES.has(parsed.hostname))) {
+    return off("LEADS_WEBHOOK_URL must start with https://.");
+  }
+  return { url: parsed.href, secret };
+}
+
+/** The sheet's Source column: the form, and the site that received the enquiry (production, a preview or local dev). */
+export function leadSource(requestUrl: string): string {
+  return `Website – Let’s talk (${new URL(requestUrl).host})`;
+}
+
+/** The JSON body sent to the lead sheet: the stored enquiry without `organisation` (the form does not ask for one). */
+export interface LeadPayload {
+  secret: string;
+  reference: string;
+  receivedAt: string;
+  name: string;
+  email: string;
+  interest: string;
+  message: string;
+  source: string;
+}
+
+/** A short code from the script's { ok: false, error } answer, reduced to characters that are safe to log. */
+const logCode = (value: unknown) => String(value).replace(/[^\w:.-]/g, "").slice(0, 60) || "unknown";
+
+/**
+ * Best effort: POSTs the stored enquiry to the lead sheet and resolves true once the script answers { ok: true }.
+ * Never throws, and gives up after LEADS_WEBHOOK_TIMEOUT_MS. A failure is logged with the enquiry's reference (to find
+ * it in the store) and the reason, never with the enquiry's contents; the visitor's answer does not change.
+ */
+export async function forwardLead(enquiry: StoredEnquiry, webhook: LeadsWebhook, source: string): Promise<boolean> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), LEADS_WEBHOOK_TIMEOUT_MS);
+  const failed = (reason: string) => {
+    console.error(`Lead sheet forward failed for enquiry ${enquiry.reference}: ${reason}`);
+    return false;
+  };
+  try {
+    const { reference, receivedAt, name, email, interest, message } = enquiry;
+    const payload: LeadPayload = { secret: webhook.secret, reference, receivedAt, name, email, interest, message, source };
+    const response = await fetch(webhook.url, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(payload),
+      // an Apps Script web app answers a POST with a redirect to its output, which is then fetched with GET
+      redirect: "follow",
+      signal: controller.signal,
+    });
+    const text = await response.text();
+    let answer: unknown = null;
+    try {
+      answer = JSON.parse(text);
+    } catch {
+      // not JSON (e.g. a Google sign-in page): reported below
+    }
+    const result = answer && typeof answer === "object" && !Array.isArray(answer) ? (answer as Record<string, unknown>) : null;
+    if (response.ok && result?.ok === true) return true;
+    if (!response.ok) return failed(`HTTP ${response.status}`);
+    if (result && "error" in result) return failed(`the sheet answered "${logCode(result.error)}"`);
+    return failed('the answer was not the lead sheet\'s JSON (is the web app deployed with access "Anyone"?)');
+  } catch (error) {
+    if (controller.signal.aborted) return failed(`no answer within ${LEADS_WEBHOOK_TIMEOUT_MS / 1000} s`);
+    const cause = error instanceof Error && error.cause && typeof error.cause === "object" && "code" in error.cause ? ` (${logCode(error.cause.code)})` : "";
+    return failed(error instanceof Error ? `${error.name}: ${error.message}${cause}` : "unknown error");
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+export interface EnquiryOptions {
+  /** Where to copy each stored enquiry (leadsWebhookFromEnv); null or absent: nowhere. */
+  leads?: LeadsWebhook | null;
+  now?: () => Date;
+}
+
+export async function handleEnquiry(request: Request, store: EnquiryStore, { leads, now = () => new Date() }: EnquiryOptions = {}): Promise<Response> {
   if (request.method !== "POST") {
     return Response.json({ error: "Method not allowed." }, { status: 405, headers: { Allow: "POST" } });
   }
@@ -148,6 +265,8 @@ export async function handleEnquiry(request: Request, store: EnquiryStore, now: 
     const reference = crypto.randomUUID().slice(0, 8).toUpperCase();
     const enquiry: StoredEnquiry = { reference, receivedAt: now().toISOString(), name, email, organisation, interest, message };
     await store(enquiryPathname(enquiry), JSON.stringify(enquiry, null, 2) + "\n");
+    // the store is the record; the sheet row is a convenience whose failure never fails the enquiry (forwardLead never throws)
+    if (leads) await forwardLead(enquiry, leads, leadSource(request.url));
     return reply({ reference }, 201);
   } catch (error) {
     // never log the enquiry itself: only what went wrong with the storage

@@ -2,7 +2,7 @@
 // server code. Validation and responses live in lib/enquiry.ts, shared with the local dev server (vite.config.ts).
 // The relative import names the compiled file (.js): Vercel runs this as an ES module, where extensions are required.
 import { put } from "@vercel/blob";
-import { handleEnquiry, type EnquiryStore } from "../lib/enquiry.js";
+import { handleEnquiry, leadsWebhookFromEnv, type EnquiryStore } from "../lib/enquiry.js";
 
 /**
  * Each enquiry becomes one JSON file in the project's private Vercel Blob store (readable only with the store's token,
@@ -23,7 +23,9 @@ const blobStore: EnquiryStore = async (pathname, json) => {
 
 const enquiries = {
   fetch(request: Request) {
-    return handleEnquiry(request, blobStore);
+    // After storing, each enquiry is also copied to the owner's Google Sheet when LEADS_WEBHOOK_URL and
+    // LEADS_WEBHOOK_SECRET are set in the project's environment variables (integrations/google-sheets-leads).
+    return handleEnquiry(request, blobStore, { leads: leadsWebhookFromEnv(process.env) });
   },
 };
 

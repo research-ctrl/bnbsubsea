@@ -5,7 +5,14 @@ const { put } = vi.hoisted(() => ({ put: vi.fn() }));
 vi.mock("@vercel/blob", () => ({ put }));
 
 import enquiries from "../api/enquiries";
-import { ENQUIRY_INTERESTS, INVALID_FIELDS_MESSAGE, INVALID_INTEREST_MESSAGE, UNAVAILABLE_MESSAGE } from "../lib/enquiry";
+import {
+  ENQUIRY_INTERESTS,
+  INVALID_FIELDS_MESSAGE,
+  INVALID_INTEREST_MESSAGE,
+  LEADS_WEBHOOK_TIMEOUT_MS,
+  UNAVAILABLE_MESSAGE,
+  leadsWebhookFromEnv,
+} from "../lib/enquiry";
 import { enquiryTopics } from "../lib/site-content";
 
 const SITE = "https://bnb.example";
@@ -34,16 +41,25 @@ async function send(request: Request) {
 }
 
 let consoleError: ReturnType<typeof vi.spyOn>;
+// fetch is mocked too: no test reaches a real lead sheet (or any other server)
+const fetchMock = vi.fn<typeof fetch>();
 
 beforeEach(() => {
   put.mockReset();
   put.mockResolvedValue({ pathname: "stored" });
   vi.stubEnv("BLOB_READ_WRITE_TOKEN", "test-token");
+  // the lead-sheet forward is off unless a test turns it on
+  vi.stubEnv("LEADS_WEBHOOK_URL", "");
+  vi.stubEnv("LEADS_WEBHOOK_SECRET", "");
+  fetchMock.mockReset();
+  fetchMock.mockRejectedValue(new Error("unexpected network request"));
+  vi.stubGlobal("fetch", fetchMock);
   consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
 });
 
 afterEach(() => {
   vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
   vi.useRealTimers();
   consoleError.mockRestore();
 });
@@ -214,5 +230,154 @@ describe("POST /api/enquiries", () => {
     expect(consoleError).toHaveBeenCalledTimes(1);
     const logged = JSON.stringify(consoleError.mock.calls);
     for (const value of [valid.name, valid.email, valid.message]) expect(logged).not.toContain(value);
+  });
+});
+
+describe("lead sheet forward (LEADS_WEBHOOK_URL / LEADS_WEBHOOK_SECRET)", () => {
+  const WEBHOOK = "https://script.google.com/macros/s/TEST-DEPLOYMENT/exec";
+  const SECRET = "test-secret-0123456789abcdefghijklmnopqrstuvwxyz";
+  const sheetAnswers = (body: unknown, init: ResponseInit = {}) =>
+    fetchMock.mockResolvedValue(new Response(typeof body === "string" ? body : JSON.stringify(body), { headers: { "content-type": "application/json" }, ...init }));
+
+  beforeEach(() => {
+    vi.stubEnv("LEADS_WEBHOOK_URL", WEBHOOK);
+    vi.stubEnv("LEADS_WEBHOOK_SECRET", SECRET);
+  });
+
+  /** Nothing personal and no secret in what was logged. */
+  function expectCleanLog() {
+    const logged = consoleError.mock.calls.map((call: unknown[]) => call.map(String).join(" ")).join("\n");
+    for (const value of [valid.name, valid.email, valid.message, SECRET]) expect(logged).not.toContain(value);
+    return logged;
+  }
+
+  it("sends the stored enquiry and the shared secret to the lead sheet, after storing it", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-10-12T16:20:05.123Z"));
+    sheetAnswers({ ok: true, reference: "ignored" });
+
+    const { status, body } = await send(post({ ...valid, name: "  Test Sender  ", message: "  A test enquiry about LOURDES.  " }));
+
+    expect(status).toBe(201);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe(WEBHOOK);
+    expect(init).toMatchObject({ method: "POST", headers: { "content-type": "application/json" }, redirect: "follow" });
+    expect(init?.signal).toBeInstanceOf(AbortSignal);
+    expect(JSON.parse(String(init?.body))).toEqual({
+      secret: SECRET,
+      reference: body.reference,
+      receivedAt: "2026-10-12T16:20:05.123Z",
+      name: "Test Sender",
+      email: "sender@example.com",
+      interest: "BNB SHOREBRIDGE 55 / LOURDES",
+      message: "A test enquiry about LOURDES.",
+      source: "Website – Let’s talk (bnb.example)",
+    });
+    // the Blob store is the record: it is written first
+    expect(put.mock.invocationCallOrder[0]).toBeLessThan(fetchMock.mock.invocationCallOrder[0]);
+    expect(consoleError).not.toHaveBeenCalled();
+  });
+
+  it("sends nothing while LEADS_WEBHOOK_URL and LEADS_WEBHOOK_SECRET are unset", async () => {
+    vi.stubEnv("LEADS_WEBHOOK_URL", "");
+    vi.stubEnv("LEADS_WEBHOOK_SECRET", "");
+    const { status, body } = await send(post(valid));
+    expect(status).toBe(201);
+    expect(body.reference).toMatch(/^[0-9A-F]{8}$/);
+    expect(put).toHaveBeenCalledTimes(1);
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(consoleError).not.toHaveBeenCalled();
+  });
+
+  it("forwards with only LEADS_WEBHOOK_URL set, sending an empty secret", async () => {
+    expect(leadsWebhookFromEnv({ LEADS_WEBHOOK_URL: "https://script.google.com/macros/s/X/exec", LEADS_WEBHOOK_SECRET: "" })).toEqual({
+      url: "https://script.google.com/macros/s/X/exec",
+      secret: "",
+    });
+    expect(leadsWebhookFromEnv({ LEADS_WEBHOOK_URL: "https://script.google.com/macros/s/X/exec" })?.secret).toBe("");
+  });
+
+  it.each([
+    ["only the secret is set", { LEADS_WEBHOOK_URL: "" }, "LEADS_WEBHOOK_SECRET is set but LEADS_WEBHOOK_URL is not"],
+    ["the URL is not a URL", { LEADS_WEBHOOK_URL: "script.google.com/macros/s/X/exec" }, "LEADS_WEBHOOK_URL is not a URL"],
+    ["the URL is plain http to another machine", { LEADS_WEBHOOK_URL: "http://script.google.com/macros/s/X/exec" }, "LEADS_WEBHOOK_URL must start with https://"],
+  ])("sends nothing, still answers 201 and logs the misconfiguration when %s", async (_label, env, reason) => {
+    for (const [key, value] of Object.entries(env)) vi.stubEnv(key, value);
+    const { status } = await send(post(valid));
+    expect(status).toBe(201);
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(expectCleanLog()).toContain(`Lead sheet forward is off: ${reason}`);
+  });
+
+  it.each([
+    ["the network fails", () => fetchMock.mockRejectedValue(new TypeError("fetch failed", { cause: { code: "ECONNREFUSED" } })), "TypeError: fetch failed (ECONNREFUSED)"],
+    ["the web app answers HTTP 500", () => sheetAnswers("Internal error", { status: 500 }), "HTTP 500"],
+    ["the script refuses the secret", () => sheetAnswers({ ok: false, error: "unauthorized" }), 'the sheet answered "unauthorized"'],
+    ["the answer is a Google sign-in page", () => sheetAnswers("<!doctype html><title>Sign in</title>", { headers: { "content-type": "text/html" } }), "not the lead sheet's JSON"],
+    ["the answer is JSON without ok: true", () => sheetAnswers({ status: "done" }), "not the lead sheet's JSON"],
+  ])("still answers 201 with the reference when %s, and logs only the reference and reason", async (_label, arrange, reason) => {
+    arrange();
+    const { status, body } = await send(post(valid));
+    expect(status).toBe(201);
+    expect(body.reference).toMatch(/^[0-9A-F]{8}$/);
+    expect(put).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(consoleError).toHaveBeenCalledTimes(1);
+    const logged = expectCleanLog();
+    expect(logged).toContain(`Lead sheet forward failed for enquiry ${body.reference}`);
+    expect(logged).toContain(reason);
+  });
+
+  it(`gives up on the lead sheet after ${LEADS_WEBHOOK_TIMEOUT_MS / 1000} s and still answers 201`, async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    let called!: () => void;
+    const calledOnce = new Promise<void>((resolve) => (called = resolve));
+    // a lead sheet that never answers: the request only ends when the website aborts it
+    fetchMock.mockImplementation((_url, init) => {
+      called();
+      return new Promise((_resolve, reject) => init?.signal?.addEventListener("abort", () => reject(init.signal?.reason)));
+    });
+    let settled = false;
+    const pending = send(post(valid)).finally(() => (settled = true));
+
+    await calledOnce;
+    await vi.advanceTimersByTimeAsync(LEADS_WEBHOOK_TIMEOUT_MS - 1);
+    expect(settled).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
+    const { status, body } = await pending;
+    expect(status).toBe(201);
+    expect(body.reference).toMatch(/^[0-9A-F]{8}$/);
+    expect(expectCleanLog()).toContain(`Lead sheet forward failed for enquiry ${body.reference}: no answer within 5 s`);
+  });
+
+  it("does not send an enquiry that could not be stored (the visitor is asked to try again)", async () => {
+    put.mockRejectedValueOnce(new Error("Vercel Blob: service unavailable"));
+    const { status } = await send(post(valid));
+    expect(status).toBe(503);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["an invalid enquiry", { ...valid, email: "not-an-email" }],
+    ["a filled-in honeypot", { ...valid, website: "https://spam.example" }],
+  ])("does not send %s", async (_label, body) => {
+    const { status } = await send(post(body));
+    expect(status).toBe(400);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("accepts plain http only for a test server on this machine", () => {
+    expect(leadsWebhookFromEnv({ LEADS_WEBHOOK_URL: "http://127.0.0.1:8787/exec", LEADS_WEBHOOK_SECRET: "s" })).toEqual({
+      url: "http://127.0.0.1:8787/exec",
+      secret: "s",
+    });
+    expect(leadsWebhookFromEnv({ LEADS_WEBHOOK_URL: "http://localhost:8787/exec", LEADS_WEBHOOK_SECRET: "s" })?.url).toBe("http://localhost:8787/exec");
+    expect(leadsWebhookFromEnv({ LEADS_WEBHOOK_URL: "http://192.168.1.5/exec", LEADS_WEBHOOK_SECRET: "s" })).toBeNull();
+    expect(leadsWebhookFromEnv({ LEADS_WEBHOOK_URL: "ftp://example.com/exec", LEADS_WEBHOOK_SECRET: "s" })).toBeNull();
+  });
+
+  it("trims the configured values", () => {
+    expect(leadsWebhookFromEnv({ LEADS_WEBHOOK_URL: `  ${WEBHOOK}\n`, LEADS_WEBHOOK_SECRET: ` ${SECRET} ` })).toEqual({ url: WEBHOOK, secret: SECRET });
   });
 });

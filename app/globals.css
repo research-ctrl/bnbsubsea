@@ -178,42 +178,53 @@ h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 600; line-height
 .figures--hero dd span { color: var(--on-dark-soft); }
 
 /* ------------------------------------------------------------------ hero */
-.hero { position: relative; isolation: isolate; display: flex; min-height: 100vh; min-height: 100svh; overflow: hidden; background: var(--navy-950); color: #fff; }
-.hero-media { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; }
+/* a size container, so the cover picture inside the centred wrap can be sized to the hero's width (cqw) */
+.hero { position: relative; isolation: isolate; container-type: inline-size; display: flex; min-height: 100vh; min-height: 100svh; overflow: hidden; background: var(--navy-950); color: #fff; }
 /* the supplied illustration is dark lines on white: show it as light lines on navy */
 .is-sketch { filter: invert(1) hue-rotate(180deg) saturate(0.65); mix-blend-mode: screen; opacity: 0.72; }
-.hero-media.is-sketch { object-position: 62% 40%; }
-/* the 21:9 hero render has the vessel in its right half (47-86 % of the width): anchoring the crop at 78 %
-   keeps the whole vessel, bow and ramp included, on every landscape screen from 5:4 to 21:9, clear of the
-   title on the left */
-.hero:not(.hero--sketch) .hero-media { object-position: 78% 50%; }
-.hero-shade { position: absolute; inset: 0; z-index: -1; background:
-  linear-gradient(180deg, rgba(6, 12, 19, 0.85) 0%, rgba(6, 12, 19, 0.2) 20%, rgba(6, 12, 19, 0) 42%, rgba(6, 12, 19, 0.55) 68%, rgba(6, 12, 19, 0.94) 100%),
-  linear-gradient(90deg, rgba(6, 12, 19, 0.78) 0%, rgba(6, 12, 19, 0.55) 30%, rgba(6, 12, 19, 0.2) 48%, rgba(6, 12, 19, 0) 62%); }
-/* square-ish screens (4:5 to 1:1) keep the landscape render, anchored on the bow */
-@media (max-aspect-ratio: 1 / 1) {
-  .hero:not(.hero--sketch) .hero-media { object-position: 82% 50%; }
-  .hero:not(.hero--sketch) .hero-shade { background:
-    linear-gradient(180deg, rgba(6, 12, 19, 0.82) 0%, rgba(6, 12, 19, 0.2) 12%, rgba(6, 12, 19, 0) 22%, rgba(6, 12, 19, 0) 40%, rgba(6, 12, 19, 0.6) 54%, rgba(6, 12, 19, 0.82) 72%, rgba(6, 12, 19, 0.96) 100%); }
+/* Cover picture: the owner's 16:9 image. The vessel spans 39-98 % of its width (bow ramp at the right edge), mast top
+   at 36 % of its height, hull sloping down towards the bow. `.hero-stage` is a full-bleed box from the top of the
+   hero down to the top of the title. The picture is as wide as the hero and is placed so the hull, where it passes
+   above the title's right end (--hero-ref of the picture's height), stays --hero-clear above the title: the sky is
+   cropped from the top as needed (never above the mast) and the sea below the vessel fades into navy behind the title
+   and figures. The picture always spans the full width; on short, wide windows the title may sit over the lower hull. */
+.hero-stage { position: relative; flex: 1 1 auto; min-height: calc(var(--header-h) + 74px); margin: calc(-1 * (var(--header-h) + 24px)) calc((100% - 100cqw) / 2) calc(-1 * var(--hero-gap)); }
+.hero-media {
+  --hero-clear: 16px;
+  /* hull above the title's right end (685 of 941 px) as a fraction of the picture's height; mast top at 36 % */
+  --hero-ref: 0.728;
+  /* always the full width of the hero (never shrunk, so no bare navy at the sides) */
+  --hero-img-h: calc(100cqw * 9 / 16);
+  position: absolute; z-index: -2; left: 0; right: 0;
+  /* lift the picture so the hull clears the title, but never so far that the mast slips under the header */
+  top: max(calc(var(--header-h) + 12px - 0.36 * var(--hero-img-h)), min(0px, 100% - var(--hero-clear) - var(--hero-ref) * var(--hero-img-h)));
+  width: 100%; height: var(--hero-img-h); object-fit: cover;
+  -webkit-mask-image: linear-gradient(180deg, #000 80%, transparent); mask-image: linear-gradient(180deg, #000 80%, transparent);
 }
-/* portrait screens: the portrait-composed render (<picture>) fills the first screen with the vessel in its
-   upper part; the text starts below the vessel, over the darkened sea, and the hero grows past the fold if it
-   needs to (the picture fades into navy) */
+/* landscape up to 16:10 has the smaller title (below), whose right end meets the hull higher up (640 px) */
+@media (min-aspect-ratio: 1 / 1) and (max-aspect-ratio: 16 / 10) { .hero-media { --hero-ref: 0.68; } }
+.hero-shade { position: absolute; inset: 0; z-index: -1; background:
+  linear-gradient(180deg, rgba(6, 12, 19, 0.8) 0%, rgba(6, 12, 19, 0.35) 12%, rgba(6, 12, 19, 0) 26%, rgba(6, 12, 19, 0) 50%, rgba(6, 12, 19, 0.5) 70%, rgba(6, 12, 19, 0.9) 100%),
+  linear-gradient(90deg, rgba(6, 12, 19, 0.45) 0%, rgba(6, 12, 19, 0.25) 30%, rgba(6, 12, 19, 0) 50%); }
+/* portrait screens: the portrait crop (the whole vessel at the full width) is a band at the top of the hero; the
+   eyebrow, title and figures follow below it, over the sea fading into navy, and the hero grows past the fold if
+   it needs to */
 @media (max-aspect-ratio: 4 / 5) {
-  .hero:not(.hero--sketch) .hero-media, .hero:not(.hero--sketch) .hero-shade { bottom: auto; height: 100vh; height: 100svh; }
-  .hero:not(.hero--sketch) .hero-media { object-position: 50% 40%; }
-  .hero:not(.hero--sketch) .hero-shade { background:
-    linear-gradient(180deg, rgba(6, 12, 19, 0.8) 0%, rgba(6, 12, 19, 0.15) 11%, rgba(6, 12, 19, 0) 18%, rgba(6, 12, 19, 0) 40%, rgba(6, 12, 19, 0.55) 50%, rgba(6, 12, 19, 0.85) 68%, #060c13 100%); }
-  .hero:not(.hero--sketch) .hero-inner { justify-content: flex-start; padding-top: max(46vh, calc(60vw + 40px)); padding-top: max(46svh, calc(60vw + 40px)); }
-  .hero:not(.hero--sketch) .hero-top { margin-bottom: 0; }
+  .hero-stage { position: absolute; top: 0; left: calc((100% - 100cqw) / 2); width: 100cqw; height: auto; min-height: 0; aspect-ratio: 1112 / 941; margin: 0; }
+  .hero-media { inset: 0; width: 100%; height: 100%; aspect-ratio: auto;
+    -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent); mask-image: linear-gradient(180deg, #000 70%, transparent); }
+  .hero-shade { background: linear-gradient(180deg, rgba(6, 12, 19, 0.75) 0%, rgba(6, 12, 19, 0) 14%); }
+  .hero-inner { justify-content: flex-start; padding-top: calc(100cqw * 941 / 1112 * 0.75); }
+  .hero-top { position: static; }
 }
 /* short landscape screens: tighter spacing so the title stays below the hull */
 @media (min-aspect-ratio: 1 / 1) and (max-height: 820px) {
   .hero-inner { gap: 24px; }
   .hero-actions { margin-top: 20px; }
 }
-.hero-inner { position: relative; display: flex; flex-direction: column; justify-content: flex-end; gap: clamp(28px, 4.5vh, 52px); min-height: 100vh; min-height: 100svh; padding-top: calc(var(--header-h) + 24px); padding-bottom: clamp(44px, 6vh, 64px); }
-.hero-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: auto; }
+.hero-inner { --hero-gap: clamp(28px, 4.5vh, 52px); position: relative; display: flex; flex-direction: column; justify-content: flex-end; gap: var(--hero-gap); min-height: 100vh; min-height: 100svh; padding-top: calc(var(--header-h) + 24px); padding-bottom: clamp(44px, 6vh, 64px); }
+/* eyebrow row: at the top of the hero, over the sky (in the flow below the picture on portrait screens) */
+.hero-top { position: absolute; top: calc(var(--header-h) + 24px); left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .hero .eyebrow--light { color: var(--on-dark); }
 .hero .eyebrow, .hero-descriptor, .hero-identity { text-shadow: 0 1px 14px rgba(6, 12, 19, 0.6); }
 /* the model name, BNB SHOREBRIDGE 55, on one line: sized to the width so it stays on the sea, left of the hull */
