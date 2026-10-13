@@ -6,25 +6,26 @@ import { handleEnquiry, leadsWebhookFromEnv, type EnquiryStore } from "../lib/en
 
 /**
  * Each enquiry becomes one JSON file in the project's private Vercel Blob store (readable only with the store's token,
- * never by URL). Vercel sets BLOB_READ_WRITE_TOKEN when the store is connected to the project.
+ * never by URL), and is copied to the owner's lead sheet when LEADS_WEBHOOK_URL is set. Either one is enough for the
+ * visitor's "Thank you"; only when both fail does the form ask them to try again.
  */
 const blobStore: EnquiryStore = async (pathname, json) => {
-  const token = process.env.BLOB_READ_WRITE_TOKEN;
-  if (!token) throw new Error("BLOB_READ_WRITE_TOKEN is not set (connect the private Blob store to the project)");
+  // BLOB_READ_WRITE_TOKEN when Vercel provides one; otherwise @vercel/blob uses the project's own store connection,
+  // and throws if there is none (the enquiry then still reaches the lead sheet, see handleEnquiry)
+  const token = process.env.BLOB_READ_WRITE_TOKEN || undefined;
   await put(pathname, json, {
     access: "private",
     contentType: "application/json",
     // the pathname is already unique (time + reference); never replace an enquiry that is already stored
     addRandomSuffix: false,
     allowOverwrite: false,
-    token,
+    ...(token ? { token } : {}),
   });
 };
 
 const enquiries = {
   fetch(request: Request) {
-    // After storing, each enquiry is also copied to the owner's Google Sheet when LEADS_WEBHOOK_URL and
-    // LEADS_WEBHOOK_SECRET are set in the project's environment variables (integrations/google-sheets-leads).
+    // The lead sheet: LEADS_WEBHOOK_URL (and optional LEADS_WEBHOOK_SECRET), see integrations/google-sheets-leads.
     return handleEnquiry(request, blobStore, { leads: leadsWebhookFromEnv(process.env) });
   },
 };

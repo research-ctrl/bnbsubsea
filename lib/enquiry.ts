@@ -264,10 +264,19 @@ export async function handleEnquiry(request: Request, store: EnquiryStore, { lea
     if (!interest) return reply({ error: INVALID_INTEREST_MESSAGE }, 400);
     const reference = crypto.randomUUID().slice(0, 8).toUpperCase();
     const enquiry: StoredEnquiry = { reference, receivedAt: now().toISOString(), name, email, organisation, interest, message };
-    await store(enquiryPathname(enquiry), JSON.stringify(enquiry, null, 2) + "\n");
-    // the store is the record; the sheet row is a convenience whose failure never fails the enquiry (forwardLead never throws)
-    if (leads) await forwardLead(enquiry, leads, leadSource(request.url));
-    return reply({ reference }, 201);
+    // Two destinations: the private store and the owner's lead sheet. The enquiry is received if either keeps it, so a
+    // store that is not configured (or is down) does not lose a lead the sheet accepted, and vice versa.
+    let stored = false;
+    try {
+      await store(enquiryPathname(enquiry), JSON.stringify(enquiry, null, 2) + "\n");
+      stored = true;
+    } catch (error) {
+      // never log the enquiry itself: only what went wrong with the storage
+      console.error(`Enquiry ${reference} was not stored:`, error instanceof Error ? `${error.name}: ${error.message}` : "Unknown storage error");
+    }
+    const copied = leads ? await forwardLead(enquiry, leads, leadSource(request.url)) : false; // forwardLead never throws
+    if (stored || copied) return reply({ reference }, 201);
+    return reply({ error: UNAVAILABLE_MESSAGE }, 503);
   } catch (error) {
     // never log the enquiry itself: only what went wrong with the storage
     console.error("Enquiry submission failed:", error instanceof Error ? `${error.name}: ${error.message}` : "Unknown storage error");

@@ -211,15 +211,12 @@ describe("POST /api/enquiries", () => {
     expect(response.headers.get("allow")).toBe("POST");
   });
 
-  it("answers 503 without calling the store when BLOB_READ_WRITE_TOKEN is missing, and logs no personal data", async () => {
+  it("lets @vercel/blob use the project's store connection when BLOB_READ_WRITE_TOKEN is not set", async () => {
     vi.stubEnv("BLOB_READ_WRITE_TOKEN", "");
-    const { status, body } = await send(post(valid));
-    expect(status).toBe(503);
-    expect(body.error).toBe(UNAVAILABLE_MESSAGE);
-    expect(put).not.toHaveBeenCalled();
-    const logged = JSON.stringify(consoleError.mock.calls);
-    expect(logged).toContain("BLOB_READ_WRITE_TOKEN");
-    for (const value of [valid.name, valid.email, valid.message]) expect(logged).not.toContain(value);
+    const { status } = await send(post(valid));
+    expect(status).toBe(201);
+    expect(put).toHaveBeenCalledTimes(1);
+    expect(put.mock.calls[0][2]).not.toHaveProperty("token");
   });
 
   it("answers 503 when the Blob store rejects the upload", async () => {
@@ -351,11 +348,23 @@ describe("lead sheet forward (LEADS_WEBHOOK_URL / LEADS_WEBHOOK_SECRET)", () => 
     expect(expectCleanLog()).toContain(`Lead sheet forward failed for enquiry ${body.reference}: no answer within 5 s`);
   });
 
-  it("does not send an enquiry that could not be stored (the visitor is asked to try again)", async () => {
+  it("still receives an enquiry the store rejected when the lead sheet accepts it", async () => {
     put.mockRejectedValueOnce(new Error("Vercel Blob: service unavailable"));
-    const { status } = await send(post(valid));
+    sheetAnswers({ ok: true });
+    const { status, body } = await send(post(valid));
+    expect(status).toBe(201);
+    expect(body.reference).toMatch(/^[0-9A-F]{8}$/);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("asks the visitor to try again only when neither the store nor the sheet keeps the enquiry", async () => {
+    put.mockRejectedValueOnce(new Error("Vercel Blob: service unavailable"));
+    sheetAnswers({ ok: false, error: "server error" });
+    const { status, body } = await send(post(valid));
     expect(status).toBe(503);
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(body.error).toBe(UNAVAILABLE_MESSAGE);
+    const logged = JSON.stringify(consoleError.mock.calls);
+    for (const value of [valid.name, valid.email, valid.message]) expect(logged).not.toContain(value);
   });
 
   it.each([
