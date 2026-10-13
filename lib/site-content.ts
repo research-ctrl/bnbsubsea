@@ -3,16 +3,18 @@
  * newbuild of the BNB SHOREBRIDGE 55 (owner's presentation email and answers, 13 Oct 2026).
  *
  * Naming: BNB SHOREBRIDGE 55 is the commercial model name (SHOREBRIDGE = the landing craft / cargo Ro-Ro series,
- * 55 = the model's nominal length in metres); LOURDES is the individual vessel's name. The model name is kept apart
- * from the measured particulars, which follow the general arrangement (52.68 m overall with ramp).
+ * 55 = the model's nominal length in metres); LOURDES is the individual vessel's name. The measured particulars
+ * follow the general arrangement (52.68 m overall with ramp).
  *
  * Honesty rules (PROJECT_SPEC section 10): LOURDES particulars come from the Nirmon general arrangement, Rev 0,
- * 07.10.2026 (the drawing number is not published: the file name and the title block disagree, SOURCE_CONFLICTS
- * INT-8). The one exception is the cargo payload, 610 t, an owner-supplied figure that is not on the GA; the page
- * labels it "Company figure" (SOURCE_CONFLICTS SB-2). No deadweight figure was supplied, so none is published,
- * and 800 t stays "maximum loading capacity" as the GA labels it. Shipyard figures are the dimensions annotated
- * on our yard plan. Renders, site plans and route maps are labelled as illustrations. No crew number, prices,
- * certification or demonstrated performance are published.
+ * 07.10.2026; the cargo payload (610 t), the cargo types, the AUT-UMS notation and sea state 5 as an operating
+ * capability are owner statements (13 Oct 2026). Owner's final changes, 13 Oct 2026: the site carries no source
+ * notes for the particulars (no GA citation, no "55 is nominal" note, no "company figure" label); provenance is kept
+ * in VESSEL_SOURCES.md and SOURCE_CONFLICTS.md (SB-1, SB-2, SB-12). Bureau Veritas is always written in full,
+ * "Bureau Veritas (BV)", never the abbreviation alone. No deadweight figure was supplied, so none is published, and 800 t stays
+ * "maximum loading capacity" as the GA labels it. Shipyard figures are the dimensions annotated on our yard plan.
+ * Renders, site plans and route maps are labelled as illustrations. No crew number, prices, certification or
+ * demonstrated performance are published.
  * The 400–500 DWT design-to-order card is an invitation to enquire, not a design: no model number, specifications or
  * picture.
  */
@@ -107,6 +109,11 @@ export const shorebridge55 = {
   status: "Current newbuild programme",
   /** owner wording, 13 Oct 2026 */
   classification: "Under Bureau Veritas (BV) classification",
+  /** owner, 13 Oct 2026: AUT-UMS, the Bureau Veritas (BV) notation for an unattended machinery space */
+  notation: "AUT-UMS",
+  notationMeaning: "Unattended machinery space",
+  /** owner, 13 Oct 2026: what she carries */
+  cargo: "Containers, vehicles, pallets, fuel tanks and hazardous materials",
   /** the exact four-line block */
   lines: [
     "BNB SHOREBRIDGE 55",
@@ -171,7 +178,7 @@ export const lourdes = {
   // no-break space after "&": a narrow screen breaks before "& Cargo Ro-Ro", never after the ampersand
   eyebrow: "Commercial Vessels · Landing Craft &\u00a0Cargo Ro-Ro",
   /** shown beside the capabilities heading */
-  tagline: "Cargo capability. Coastal access. Cyber resilience.",
+  tagline: "Versatile cargo. Coastal access. Sea state 5. Cyber resilience.",
   hero: lourdesHero,
   heroFigures: [
     { value: "52.68", unit: "m", label: "Overall length, with ramp" },
@@ -180,18 +187,13 @@ export const lourdes = {
     { value: "800", unit: "t", label: "Maximum loading capacity" },
   ] satisfies Figure[],
   specsIntro:
-    "A 55-metre landing craft / cargo Ro-Ro, designed for cargo through ports and permitted beach landing sites. Its reference newbuild, LOURDES, is our current newbuild programme at our shipyard in Fomar, Shiroda, Goa, under Bureau Veritas (BV) classification.",
-  /** 55 is a nominal figure: say so beside the measured particulars */
-  specsNominal:
-    "55 is the model’s nominal length in metres. The measured particulars below are those of LOURDES and follow the general arrangement: 52.68\u00a0m overall with the ramp, 51.00\u00a0m hull.",
-  specsSource:
-    "Particulars follow the Nirmon general arrangement, Rev 0, dated 07 October 2026, except where a row notes otherwise.",
+    "A 55-metre landing craft / cargo Ro-Ro that carries containers, vehicles, pallets, fuel tanks and hazardous materials through ports and permitted beach landing sites, designed for sea state\u00a05. Its reference newbuild, LOURDES, is our current newbuild programme at our shipyard in Fomar, Shiroda, Goa, under Bureau Veritas (BV) classification with the AUT-UMS notation.",
   specGroups: [
     {
       id: "identity",
       title: "Model and vessel",
       rows: [
-        { label: "Model", value: shorebridge55.model, note: "SHOREBRIDGE series · 55 = nominal length in metres" },
+        { label: "Model", value: shorebridge55.model },
         { label: "Vessel", value: "LOURDES", note: "Reference newbuild" },
         { label: "Type", value: "Landing craft / cargo Ro-Ro" },
         { label: "Status", value: shorebridge55.status },
@@ -207,13 +209,20 @@ export const lourdes = {
         { label: "Breadth", value: "12.50\u00a0m" },
         { label: "Depth", value: "4.00\u00a0m" },
         { label: "Draft", value: "2.70\u00a0m" },
-        { label: "Maximum loading capacity", value: "800\u00a0t" },
-        { label: "Cargo payload", value: "610\u00a0t", note: "Company figure; not stated on the general arrangement" },
-        { label: "Nominal container capacity", value: "24\u00a0TEU", note: "Five bays of four 20\u00a0ft containers, plus four on the aft bay" },
         { label: "Main engines", value: "2 × 600\u00a0BHP" },
         { label: "Speed, approximate", value: "10\u00a0knots" },
-        { label: "Hull design basis", value: "Sea state 5", note: "Hull designed for sea state 5, as stated on the general arrangement" },
+        { label: "Design sea state", value: "Sea state\u00a05" },
         { label: "Flag", value: "Malta" },
+      ],
+    },
+    {
+      id: "cargo",
+      title: "Cargo",
+      rows: [
+        { label: "Cargo carried", value: shorebridge55.cargo },
+        { label: "Cargo payload", value: "610\u00a0t" },
+        { label: "Maximum loading capacity", value: "800\u00a0t" },
+        { label: "Nominal container capacity", value: "24\u00a0TEU", note: "Five bays of four 20\u00a0ft containers, plus four on the aft bay" },
       ],
     },
     {
@@ -221,20 +230,26 @@ export const lourdes = {
       title: "Classification",
       rows: [
         { label: "Classification", value: shorebridge55.classification },
+        { label: "Class notation", value: shorebridge55.notation, note: shorebridge55.notationMeaning },
         { label: "Cyber resilience", value: "Notation in scope", note: "Not yet certified" },
       ],
     },
   ] satisfies SpecGroup[],
   capabilities: [
     {
-      id: "roro-access",
-      title: "Ro-Ro cargo access.",
-      body: "A cargo vessel with a bow ramp, designed to serve dedicated Ro-Ro ports and support roll-on, roll-off operations.",
+      id: "cargo",
+      title: "Versatile cargo.",
+      body: "Containers, vehicles, pallets, fuel tanks and hazardous materials. A bow ramp serves dedicated Ro-Ro ports and supports roll-on, roll-off operations.",
     },
     {
       id: "beyond-the-port",
       title: "Beyond the port.",
       body: "Designed for beach landing operations, so cargo can be loaded and unloaded at suitable, permitted beaches where port facilities are unavailable, within the vessel’s operating limits.",
+    },
+    {
+      id: "sea-state-5",
+      title: "Sea state\u00a05.",
+      body: "LOURDES is designed for sea state\u00a05, so she can handle rough seas, within the vessel’s operating limits.",
     },
     {
       id: "cyber-resilience",
@@ -250,7 +265,7 @@ export const drawings = {
   eyebrow: "BNB SHOREBRIDGE 55 · LOURDES /\u00a0Drawings",
   title: "THE DRAWINGS.",
   intro:
-    "Explore LOURDES, the BNB SHOREBRIDGE 55 reference newbuild, in 3D, or study her general arrangement. The GA views are taken directly from the Nirmon general arrangement, Rev 0, 07 October 2026.",
+    "Explore LOURDES, the BNB SHOREBRIDGE 55 reference newbuild, in 3D, or study her general arrangement.",
   model: {
     src: "/models/lourdes.glb",
     /** transparent still of the live 3D view (same framing and light), shown while it loads and without WebGL */
@@ -273,7 +288,7 @@ export const drawings = {
       height: 835,
       fullWidth: 5143,
       fullHeight: 1789,
-      alt: "LOURDES outboard profile from the Nirmon general arrangement dated 07 October 2026",
+      alt: "LOURDES outboard profile from her general arrangement",
       caption: "General arrangement / Outboard profile / 07 October 2026",
     },
     {
@@ -285,7 +300,7 @@ export const drawings = {
       height: 552,
       fullWidth: 5150,
       fullHeight: 1184,
-      alt: "LOURDES main deck plan with the 24\u00a0TEU cargo arrangement from the Nirmon general arrangement",
+      alt: "LOURDES main deck plan from her general arrangement, with the 24\u00a0TEU cargo arrangement",
       caption: "General arrangement / Main deck plan / 07 October 2026",
     },
   ],
@@ -341,11 +356,11 @@ export const lourdesStory: Story = {
       id: "systems",
       label: "Systems",
       title: "Connected. Cyber-resilient.",
-      body: "The structure settles back into place, and the wheelhouse brings navigation and communications together above the deckhouse. LOURDES is under Bureau Veritas (BV) classification, with a cyber-resilience notation in scope.",
+      body: "The structure settles back into place, and the wheelhouse brings navigation and communications together above the deckhouse. LOURDES is under Bureau Veritas (BV) classification with the AUT-UMS notation; a cyber-resilience notation is in scope.",
       start: 231,
       end: 299,
       alt: "The structure and the deckhouse levels settle back into place while the camera moves to the wheelhouse, mast and antennas.",
-      fact: { value: "BV", label: shorebridge55.classification },
+      fact: { value: shorebridge55.notation, label: "Bureau Veritas (BV) notation · unattended machinery space" },
       note: "Bridge equipment shown is representative.",
     },
     {
@@ -447,7 +462,7 @@ export const shipyard = {
 export const routes = {
   eyebrow: "Route of operation",
   title: "From Goa, to a wider horizon.",
-  body: "From our shipyard in Goa, LOURDES is intended to operate across the Mediterranean, the west coast of Africa, Asia and the Indian Ocean.",
+  body: "From our shipyard in Goa, LOURDES is intended to operate across the Mediterranean, the west coast of Africa, Asia and the Indian Ocean. The circles mark illustrative operating areas around Goa and the major ports of each region.",
   origin: { label: "From", value: "Goa, India" },
   regions: [
     { id: "mediterranean", name: "Mediterranean" },
@@ -456,7 +471,7 @@ export const routes = {
     { id: "indian-ocean", name: "Indian Ocean" },
   ],
   /** caption passed to <RouteMap /> (it appends the Natural Earth credit) */
-  caption: "Illustrative routes from Goa, not confirmed sailing routes.",
+  caption: "Illustrative routes and operating areas from Goa, not confirmed sailing routes or port calls.",
 };
 
 /* ------------------------------------------------------------------ Company */

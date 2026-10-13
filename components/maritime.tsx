@@ -89,7 +89,7 @@ function SpecTable({ rows, labelledBy }: { rows: SpecRow[]; labelledBy: string }
   );
 }
 
-/** Specifications, headed by the model: identity rows, then the GA particulars, then classification on its own. */
+/** Specifications, headed by the model: identity rows, the particulars, cargo, then classification on its own. */
 function Specifications() {
   return (
     <section className="specs section" id="specifications" aria-labelledby="specifications-title">
@@ -99,11 +99,9 @@ function Specifications() {
           <h2 id="specifications-title">{shorebridge55.model}</h2>
           <LabelledLine className="specs-reference" label={shorebridge55.referenceLabel} value={shorebridge55.vessel} />
           <p className="specs-lead">{lourdes.specsIntro}</p>
-          <p className="specs-nominal">{lourdes.specsNominal}</p>
           <a className="text-link" href="#capabilities">
             Explore its capabilities
           </a>
-          <p className="source-note">{lourdes.specsSource}</p>
         </div>
         <div className="spec-groups">
           {lourdes.specGroups.map(g => (

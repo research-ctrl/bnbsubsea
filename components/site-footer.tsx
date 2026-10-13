@@ -35,11 +35,7 @@ export function SiteFooter({ base = "" }: { base?: string }) {
         <p>
           © {year} {brand.name} · {brand.location}
         </p>
-        <p>
-          Design visualisations, site plans and route maps are illustrations and are labelled as such. {shorebridge55.model} / LOURDES
-          particulars follow the Nirmon general arrangement, Rev 0, 07.10.2026, except the cargo payload (company figure). 55 is the
-          model’s nominal length in metres.
-        </p>
+        <p>Design visualisations, site plans and route maps are illustrations and are labelled as such.</p>
       </div>
     </footer>
   );

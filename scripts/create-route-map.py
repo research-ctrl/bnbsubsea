@@ -40,7 +40,22 @@ Routes
                          South China Sea off southern Vietnam.
     Indian Ocean         south-west across the Arabian Sea, west of Lakshadweep; ends in the western
                          Indian Ocean (no port implied).
-  Region end points are positions at sea inside each region's halo, not ports or port calls.
+  Region end points are positions at sea inside each region, not ports or port calls.
+
+Major ports and operating areas (owner's final changes, 13 Oct 2026)
+  A small orange point, in the style of the BNBSBD yard marker, marks each major port in the operating
+  regions (the route ends use the same point); the ports are not named on the map, only in its
+  screen-reader text (owner: "remove those black circles and the names"). Every port, Goa included, has
+  the same illustrative operating radius around it; overlapping circles merge into one operating area. The
+  ports are approximate harbour positions used as reference points: not port calls, agencies or services.
+  The radius is illustrative and is not published as a figure. Mercator is conformal, so a circle of fixed
+  ground radius is drawn as a circle whose radius grows with 1/cos(lat). The script checks that every port
+  lies on the coast (within PORT_COAST_KM of 1:10m land) and reports operating circles that nearly touch.
+
+Labels
+  The region, origin and passage labels are checked at every map breakpoint (BREAKPOINTS, which mirror the
+  CSS in route-map.tsx): they must stay clear of each other, of the routes, of every point and of the map
+  edges. The run fails if one does not.
 
 Country borders are deliberately not drawn (only coastlines).
 
@@ -60,7 +75,7 @@ from pathlib import Path
 
 import numpy as np
 import shapely
-from shapely.geometry import LineString, MultiPolygon, Polygon, box, shape
+from shapely.geometry import LineString, MultiPolygon, Point, Polygon, box, shape
 from shapely.ops import unary_union
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -220,30 +235,79 @@ ROUTES = [
     ("indian-ocean", INDIAN_OCEAN, None),
 ]
 
-# Soft region halos: centre lon/lat, radii in degrees of lon/lat, rotation (deg, screen space).
-HALOS = {
-    "mediterranean": dict(c=(18.0, 37.0), r=(21.0, 6.6), rot=-4),
-    "west-africa": dict(c=(-15.0, 11.0), r=(8.0, 10.5), rot=18),
-    "asia": dict(c=(105.5, 7.0), r=(12.5, 11.0), rot=0),
-    "indian-ocean": dict(c=(62.5, -2.0), r=(15.0, 11.0), rot=-18),
-}
-
 # Label anchors (lon, lat) for the region labels; text-anchor chosen per label in the component.
 LABELS = {
     "mediterranean": (20.0, 39.25),
-    "west-africa": (-12.5, 0.6),
+    "west-africa": (-12.5, -2.6),  # 13 Oct 2026: moved from (-12.5, 0.6), clear of the Abidjan point
     "asia": (112.6, 9.6),
-    "indian-ocean": (58.6, -5.4),
-    "origin": (76.6, 16.6),
+    "indian-ocean": (56.6, -6.9),  # 13 Oct 2026: moved from (58.6, -5.4), clear of the route end on phones
+    "origin": (77.45, 17.0),  # 13 Oct 2026: from (76.6, 16.6), clear of the yard marker's rings
     # passages named on the map (small labels, wide screens only)
     "p-suez": (34.3, 30.9),
-    "p-bab-el-mandeb": (42.2, 11.2),
-    # review 12 Oct 2026: just north-east of the strait over the Spanish coast, with a short leader to the
-    # strait (was (-6.3, 37.2) with the text running west over the open Atlantic)
-    "p-gibraltar": (-4.3, 37.75),
-    "p-gibraltar-from": (-5.45, 36.15),
-    "p-malacca": (99.2, 2.4),
+    # 13 Oct 2026: moved from (42.2, 11.2), over the Horn of Africa, to the Yemen side, clear of the Djibouti point
+    "p-bab-el-mandeb": (44.1, 14.65),
+    # 13 Oct 2026: beside the Gibraltar point, running west over the Atlantic, without a leader (it was north-east
+    # of the strait with a leader, where the 10 px label met the route at 900-1199 px)
+    "p-gibraltar": (-7.2, 37.3),
+    "p-malacca": (99.0, 1.9),  # 13 Oct 2026: from (99.2, 2.4), clear of the route at 900-1199 px
 }
+# Region label lines as route-map.tsx draws them (ROUTES[].label, set in capitals; centred on the anchor).
+REGION_LINES = {
+    "mediterranean": ["MEDITERRANEAN"],
+    "west-africa": ["WEST COAST", "OF AFRICA"],
+    "asia": ["ASIA"],
+    "indian-ocean": ["INDIAN OCEAN"],
+}
+# Passage labels: key in LABELS, text, text-anchor.
+PASSAGES = [
+    ("p-suez", "SUEZ CANAL", "start"),
+    ("p-bab-el-mandeb", "BAB-EL-MANDEB", "start"),
+    ("p-gibraltar", "STRAIT OF GIBRALTAR", "end"),
+    ("p-malacca", "STRAIT OF MALACCA", "end"),
+]
+
+# Major ports (owner's final changes, 13 Oct 2026; see the module docstring). Approximate harbour positions.
+# The name is used only in the map's screen-reader text.
+PORTS = [
+    # id            name           lon      lat
+    ("mumbai", "Mumbai", 72.84, 18.94),
+    ("kochi", "Kochi", 76.26, 9.97),
+    ("colombo", "Colombo", 79.85, 6.95),
+    ("male", "Malé", 73.51, 4.18),
+    ("salalah", "Salalah", 54.00, 16.94),
+    ("jebel-ali", "Jebel Ali", 55.03, 25.01),
+    ("djibouti", "Djibouti", 43.14, 11.60),
+    ("jeddah", "Jeddah", 39.17, 21.48),
+    ("port-said", "Port Said", 32.30, 31.26),
+    ("valletta", "Valletta", 14.51, 35.90),
+    ("gibraltar", "Gibraltar", -5.35, 36.14),
+    ("dakar", "Dakar", -17.43, 14.69),
+    ("abidjan", "Abidjan", -4.01, 5.30),
+    ("lagos", "Lagos", 3.40, 6.44),
+    ("mombasa", "Mombasa", 39.67, -4.06),
+    ("singapore", "Singapore", 103.84, 1.26),
+    ("chittagong", "Chittagong", 91.80, 22.33),
+]
+OPERATING_RADIUS_KM = 520  # illustrative, the same for every port; not published
+PORT_COAST_KM = 25         # a port position must lie within this distance of 1:10m land
+
+# Label geometry, mirroring route-map.tsx. Text is IBM Plex Mono in capitals: advance 0.6 em, cap height
+# 0.7 em; letter-spacing in em.
+MONO_ADV, CAP_EM, DESC_EM, PAD = 0.6, 0.72, 0.06, 1.6
+# Points (owner, 13 Oct 2026: every point in the orange BNBSBD style). Solid extent (ring + stroke) in marker
+# units, scaled by k; the soft glows around the points may sit under labels.
+POINT_RING = 5.7     # port and route-end point: ring r 5.2
+ORIGIN_RING = 9.2    # yard marker: inner ring r 8.5 (its faint outer ring and glow may sit under labels)
+# Map breakpoints by container width, as set in the CSS of route-map.tsx: k scales the labels and the points;
+# casing is the route casing width; small labels (passages, graticule) and the origin's second and third lines
+# show only on the wider maps; edge is the margin kept clear at the sides (below 600 px the panning map fades
+# out over its first and last 18 px).
+BREAKPOINTS = [
+    dict(name=">=1200 px", k=1.0, casing=4.5, passages=8.5, grat=8.5, subs=True, edge=3),
+    dict(name="900-1199 px", k=1.35, casing=5.5, passages=10.0, grat=10.0, subs=True, edge=3),
+    dict(name="600-899 px", k=1.6, casing=7.5, passages=None, grat=None, subs=False, edge=3),
+    dict(name="<600 px", k=1.8, casing=9.0, passages=None, grat=None, subs=False, edge=36),
+]
 
 GRATICULE_STEP = 15
 
@@ -397,6 +461,110 @@ def sample_segments(segs, target=2400, min_n=12):
     return np.concatenate(xs), np.concatenate(ys), np.concatenate(seg_idx)
 
 
+# ----------------------------------------------------------------------------- ports, areas and labels
+def text_box(x, y, text, size, ls, anchor):
+    """Box (x0, y0, x1, y1) of a single line of capitals in the mono font, baseline at y."""
+    w = len(text) * size * (MONO_ADV + ls)
+    x0 = x if anchor == "start" else x - w if anchor == "end" else x - w / 2
+    return (x0 - PAD, y - size * CAP_EM - PAD, x0 + w + PAD, y + size * DESC_EM + PAD)
+
+
+def overlaps(a, b) -> bool:
+    return a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]
+
+
+def hits_disc(b, x, y, r) -> bool:
+    """Does box b intersect the disc of radius r at (x, y)?"""
+    nx, ny = min(max(x, b[0]), b[2]), min(max(y, b[1]), b[3])
+    return math.hypot(nx - x, ny - y) < r
+
+
+def hits_route(b, route_pts, margin) -> bool:
+    inside = (route_pts[:, 0] > b[0] - margin) & (route_pts[:, 0] < b[2] + margin) & (route_pts[:, 1] > b[1] - margin) & (route_pts[:, 1] < b[3] + margin)
+    return bool(inside.any())
+
+
+def port_radius_px(lat: float) -> float:
+    return OPERATING_RADIUS_KM / R_EARTH_KM * K / math.cos(math.radians(lat))
+
+
+def fixed_labels(bp, geometry):
+    """Boxes of the labels drawn at this breakpoint: (group, box). Lines of one label share a group."""
+    k = bp["k"]
+    boxes = []
+    for rid, lines in REGION_LINES.items():
+        x, y = geometry["labels"][rid]
+        boxes.append((f"region {rid}", text_box(x, y - 14 * k, "00", 10 * k, 0.16, "middle")))
+        for i, line in enumerate(lines):
+            boxes.append((f"region {rid}", text_box(x, y + i * 15 * k, line, 12.5 * k, 0.2, "middle")))
+    ox, oy = geometry["labels"]["origin"]
+    boxes.append(("origin label", text_box(ox, oy, "GOA · FOMAR, SHIRODA", 12 * k, 0.12, "start")))
+    if bp["subs"]:
+        boxes.append(("origin label", text_box(ox, oy + 14 * k, "BNBSBD SHIPYARD", 9.5 * k, 0.14, "start")))
+        boxes.append(("origin label", text_box(ox, oy + 26 * k, "LOURDES NEWBUILD PROGRAMME", 9.5 * k, 0.14, "start")))
+    if bp["passages"]:
+        for key, text, anchor in PASSAGES:
+            x, y = geometry["labels"][key]
+            boxes.append((f"passage {key}", text_box(x, y, text, bp["passages"], 0.12, anchor)))
+    return boxes
+
+
+def check_labels(geometry, route_xy):
+    """Region, origin and passage labels: clear of each other, the routes, every point and the map edges."""
+    route_pts = np.concatenate([np.column_stack(xy) for xy in route_xy.values()])
+    points = [(f"{pid} point", p["x"], p["y"], POINT_RING) for pid, p in geometry["ports"].items()]
+    points += [(f"{rid} route end", *r["end"], POINT_RING) for rid, r in geometry["routes"].items()]
+    points.append(("yard marker", *geometry["origin"], ORIGIN_RING))
+    problems = 0
+    print("\nlabels (region, origin, passages) at every breakpoint")
+    for bp in BREAKPOINTS:
+        k, e = bp["k"], bp["edge"]
+        boxes = fixed_labels(bp, geometry)
+        found = []
+        for i, (name, b) in enumerate(boxes):
+            if b[0] < e or b[2] > W - e or b[1] < 3 or b[3] > H - 3:
+                found.append(f"{name} at the map edge")
+            for other, ob in boxes[i + 1:]:
+                if other != name and overlaps(b, ob):
+                    found.append(f"{name} overlaps {other}")
+            for pname, px, py, r in points:
+                if hits_disc(b, px, py, r * k + 1):
+                    found.append(f"{name} covers the {pname}")
+            if hits_route(b, route_pts, bp["casing"] / 2 + 0.5):
+                found.append(f"{name} crosses a route")
+        found = sorted(set(found))
+        print(f"  {bp['name']:12s} {'clear' if not found else ''}")
+        for f in found:
+            print(f"      CONFLICT: {f}")
+        problems += len(found)
+    return problems
+
+
+def operating_areas(ports_px):
+    """Operating circles around every port (Goa first); overlapping circles merge into one area."""
+    circles = [(pid, x, y, port_radius_px(lat)) for pid, x, y, lat in ports_px]
+    print(f"\noperating areas: radius {OPERATING_RADIUS_KM} km around each of {len(circles)} ports (illustrative)")
+    for i, (a, ax, ay, ar) in enumerate(circles):
+        for b, bx, by, br in circles[i + 1:]:
+            dist = math.hypot(ax - bx, ay - by)
+            gap = dist - (ar + br)
+            # the point where the two circles (nearly) touch; no pinch shows if a third circle covers it
+            t = (ar + gap / 2) / dist
+            mx, my = ax + (bx - ax) * t, ay + (by - ay) * t
+            covered = any(math.hypot(mx - cx, my - cy) < cr - 3 for c, cx, cy, cr in circles if c not in (a, b))
+            if abs(gap) < 0.12 * min(ar, br) and not covered:
+                print(f"  WARNING: the {a} and {b} circles nearly touch (gap {gap:+.1f} px)")
+    discs = [Point(x, y).buffer(r, quad_segs=48) for _, x, y, r in circles]
+    union = unary_union(discs).intersection(box(0, 0, W, H))
+    areas = []
+    for poly in sorted(polygons(union), key=lambda p: -p.area):
+        members = [pid for (pid, x, y, _), d in zip(circles, discs) if poly.contains(Point(x, y))]
+        d = ring_path(poly.exterior.coords) + "".join(ring_path(r.coords) for r in poly.interiors)
+        areas.append({"ports": members, "d": d})
+        print(f"  area {' + '.join(members)}")
+    return areas
+
+
 # ----------------------------------------------------------------------------- build
 def build(ne_dir: Path, write: bool) -> int:
     pad = 4.0
@@ -469,7 +637,8 @@ def build(ne_dir: Path, write: bool) -> int:
     tree = shapely.STRtree(pieces)
     km_per_px_eq = R_EARTH_KM / K
 
-    geometry = {"width": W, "height": H, "routes": {}, "halos": {}, "labels": {}, "graticule": {}}
+    geometry = {"width": W, "height": H, "routes": {}, "labels": {}, "graticule": {}, "passages": [], "ports": {}, "areas": []}
+    route_xy = {}
     ox, oy = pt(*ORIGIN)
     geometry["origin"] = [r1(ox), r1(oy)]
     failures = 0
@@ -511,23 +680,36 @@ def build(ne_dir: Path, write: bool) -> int:
         print(f"      closest approach to land after Mormugao Bay: {dist_km[j]:.1f} km at {lon[j]:.2f}, {lat[j]:.2f}")
         end = psegs[-1][3]
         geometry["routes"][rid] = {"d": d, "end": [r1(end[0]), r1(end[1])]}
+        route_xy[rid] = (x, y)
 
-    for rid, h in HALOS.items():
-        cx, cy = pt(*h["c"])
-        x0, _ = pt(h["c"][0] - h["r"][0], h["c"][1])
-        x1, _ = pt(h["c"][0] + h["r"][0], h["c"][1])
-        _, y0 = pt(h["c"][0], h["c"][1] + h["r"][1])
-        _, y1 = pt(h["c"][0], h["c"][1] - h["r"][1])
-        geometry["halos"][rid] = {"cx": r1(cx), "cy": r1(cy), "rx": r1((x1 - x0) / 2), "ry": r1((y1 - y0) / 2), "rot": h["rot"]}
     for k, (lon, lat) in LABELS.items():
         x, y = pt(lon, lat)
         geometry["labels"][k] = [r1(x), r1(y)]
     geometry["graticule"]["lon"] = [[lon, r1(pt(lon, 0)[0])] for lon in range(0, 121, 30)]
     geometry["graticule"]["lat"] = [[lat, r1(pt(0, lat)[1])] for lat in (-15, 0, 15, 30, 45)]
+    geometry["passages"] = [{"key": key, "text": text, "anchor": anchor} for key, text, anchor in PASSAGES]
+
+    # ---------------- major ports, operating areas, label check
+    print(f"\nports (distance to the 1:10m coastline; must be within {PORT_COAST_KM} km)")
+    for pid, name, lon, lat in PORTS:
+        x, y = pt(lon, lat)
+        geometry["ports"][pid] = {"name": name, "x": r1(x), "y": r1(y)}
+        nearest = tree.query_nearest(shapely.points([[x, y]]), return_distance=True, all_matches=False)
+        coast_km = float(nearest[1][0]) * km_per_px_eq * math.cos(math.radians(lat))
+        print(f"  {pid:11s} {lat:6.2f} {lon:7.2f}  {coast_km:5.1f} km from the coastline")
+        if coast_km > PORT_COAST_KM:
+            failures += 1
+            print(f"      FAILED: {pid} is {coast_km:.1f} km from the coast")
+    ports_px = [("goa", ox, oy, ORIGIN[1])] + [(pid, *pt(lon, lat), lat) for pid, _n, lon, lat in PORTS]
+    geometry["areas"] = operating_areas(ports_px)
+    label_problems = check_labels(geometry, route_xy)
+    if label_problems:
+        failures += label_problems
+        print(f"  FAILED: {label_problems} label conflicts")
 
     print(f"\nbase map: {kept} land polygons kept, {dropped} below 0.35 px^2 dropped, {len(svg.encode()):,} bytes")
     if failures:
-        print(f"FAILED: {failures} samples on land outside the exempt waterways")
+        print(f"FAILED: {failures} problems (routes on land, ports off the coast or label conflicts)")
         return 1
     if not write:
         print("--no-write: nothing written")

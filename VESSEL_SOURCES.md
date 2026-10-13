@@ -1,6 +1,6 @@
 # Vessel and site sources
 
-Updated 13 October 2026 (model naming, owner's presentation email and answers). Since the 12 October scope change the website presents **one vessel only**: LOURDES, presented since 13 October under the commercial model name **BNB SHOREBRIDGE 55** (section 0), with her specifications and design, our shipyard at Fomar, Shiroda, Goa (home of the LOURDES newbuild programme) and her route of operation. Every claim on the site is tagged as one of:
+Updated 13 October 2026 (model naming, owner's presentation email and answers; then the owner's final changes, section 0a). Since the 12 October scope change the website presents **one vessel only**: LOURDES, presented since 13 October under the commercial model name **BNB SHOREBRIDGE 55** (section 0), with her specifications and design, our shipyard at Fomar, Shiroda, Goa (home of the LOURDES newbuild programme) and her route of operation. Every claim on the site is tagged as one of:
 
 - **Verified**: taken from a supplied drawing or brief and checked against it.
 - **Illustration**: a design visualisation, schematic or illustrative map. The site labels it as such.
@@ -14,13 +14,24 @@ Supplied references live in `BNB_Website/references_supplied/` (read-only). Noth
 
 - **BNB SHOREBRIDGE 55** is the commercial model name for LOURDES, not a technical classification. SHOREBRIDGE = our landing craft / cargo Ro-Ro series; 55 = the model's nominal length in metres; LOURDES = the individual vessel's name. Each vessel keeps her own name; later models follow SHOREBRIDGE + nominal length once their designs exist (none is announced).
 - Under Commercial Vessels → Landing Craft & Cargo Ro-Ro the site shows exactly: "BNB SHOREBRIDGE 55" / "55-metre Landing Craft / Cargo Ro-Ro" / "Reference newbuild: LOURDES" / "Status: Current newbuild programme" (`shorebridge55.lines` in `lib/site-content.ts`). The hero leads with the same block.
-- **55 is nominal, not measured.** The owner asked to keep "55" in the title and the "55-metre" line as written. The measured particulars follow the GA (52.68 m overall with ramp, 51.00 m hull); the specifications section says so next to the table, and so does the footer (SOURCE_CONFLICTS SB-1).
+- **55 is nominal, not measured.** The owner asked to keep "55" in the title and the "55-metre" line as written. The measured particulars follow the GA (52.68 m overall with ramp, 51.00 m hull). Until the owner's final changes the specifications and the footer said so; the owner had that note removed (section 0a, SOURCE_CONFLICTS SB-1, SB-12). The range section keeps its one-line series convention ("The number in a model's name is its nominal length in metres").
 - **Design-to-order card.** "400–500 DWT Landing Craft — Design-to-Order Enquiries Welcome" with "Configuration and specifications subject to engineering feasibility and applicable approvals." Text only: no SHOREBRIDGE number, no specifications, no picture; it is an invitation to enquire, not a design. Any future illustration must be labelled concept (SB-7).
 - **Enquiry subjects.** The contact form's "Enquiry about" list is "BNB SHOREBRIDGE 55 / LOURDES", "400–500 DWT design-to-order landing craft" and "Shipyard / general" (`ENQUIRY_INTERESTS` in `lib/enquiry.ts`, enforced by the API too). Links to `#enquire-shorebridge-55` (hero and model card buttons) and `#enquire-design-to-order` preselect the subject. For a transition period the API also accepts the retired "Shipbuilding", which pages loaded before the deployment still send, and stores it as "Shipyard / general" (SOURCE_CONFLICTS SB-10).
 
+## 0a. Owner's final changes (13 Oct 2026)
+
+**Source: owner instruction**, 13 Oct 2026 ("these are the final changes"). Recorded in SOURCE_CONFLICTS SB-12 to SB-16 and RM-4.
+
+- **Source notes removed from the site** (exact wording in SOURCE_CONFLICTS SB-12): the drawings intro's sentence naming the Nirmon GA, Rev 0, as the source of the GA views; the specifications note that 55 is the nominal length and the measured particulars follow the GA, and its footer repeat; the specifications line saying the particulars follow the GA except where a row notes otherwise. With them went the row notes that cited the GA ("Company figure; not stated on the general arrangement" on the cargo payload, "SHOREBRIDGE series · 55 = nominal length in metres" on the model, "as stated on the general arrangement" on sea state) and the GA name in the drawing alt texts. The provenance is unchanged and stays in this file and in SOURCE_CONFLICTS. The drawing captions still read "General arrangement / … / 07 October 2026".
+- **Bureau Veritas is always written in full**, "Bureau Veritas (BV)", never the abbreviation alone: hero tag, specifications, story, company copy, metadata. The story's Systems chapter showed the bare abbreviation as its headline figure; it now shows "AUT-UMS" with the label "Bureau Veritas (BV) notation · unattended machinery space".
+- **Sea state 5.** The vessel is designed for sea state 5 and can handle it: specifications row "Design sea state: Sea state 5", the specifications intro, a capability card ("LOURDES is designed for sea state 5, so she can handle rough seas, within the vessel's operating limits.") and the capabilities tagline.
+- **Cargo.** She carries containers, vehicles, pallets, fuel tanks and hazardous materials: a new Cargo group in the specifications ("Cargo carried", with the payload, the maximum loading capacity and the TEU figure), the specifications intro, the first capability card ("Versatile cargo.") and the page description. Internal note: carrying dangerous goods depends on class and flag approvals; none is on file (SB-14).
+- **AUT-UMS notation** (unattended machinery space), next to the classification: specifications row "Class notation: AUT-UMS", the specifications intro, the story's Systems chapter and the page description. Cyber resilience stays "Notation in scope", "Not yet certified".
+- **Route map**: an orange point at every major port and illustrative operating-radius circles (section 3, RM-4).
+
 ## 1. LOURDES, reference newbuild of the BNB SHOREBRIDGE 55 (landing craft / cargo Ro-Ro)
 
-**Verified: general arrangement.** Nirmon general arrangement, Rev 0, 07.10.2026 (A1, 1:90). This governs all Lourdes particulars. The site cites it without a drawing number: the title block reads DRAWING NO NI564-101 (PROJECT NO NI564), while the supplied file name and PDF metadata say nd664-101 (SOURCE_CONFLICTS INT-8). File: `references_supplied/Nirmon_GA_ND664-101_2026-10-07.pdf`.
+**Verified: general arrangement.** Nirmon general arrangement, Rev 0, 07.10.2026 (A1, 1:90). This governs all Lourdes particulars. Since the owner's final changes the site no longer names it in its copy (section 0a); before that it cited it without a drawing number: the title block reads DRAWING NO NI564-101 (PROJECT NO NI564), while the supplied file name and PDF metadata say nd664-101 (SOURCE_CONFLICTS INT-8). File: `references_supplied/Nirmon_GA_ND664-101_2026-10-07.pdf`.
 
 | Item | Value used on the site | Basis |
 |---|---|---|
@@ -31,9 +42,11 @@ Supplied references live in `BNB_Website/references_supplied/` (read-only). Noth
 | Maximum loading capacity | 800 t | GA |
 | Main engines | 2 × 600 BHP | GA |
 | Speed | approx. 10 knots | GA |
-| Hull design basis | sea state 5 | GA |
+| Design sea state | sea state 5 | GA (hull design basis); owner, 13 Oct 2026: the vessel is designed for sea state 5 and can handle it (SB-13) |
 | Flag / class | Malta / Bureau Veritas | GA |
-| Cargo payload | 610 t | **Owner figure, 13 Oct 2026; not on the GA** (labelled "Company figure; not stated on the general arrangement" on the site; SOURCE_CONFLICTS SB-2) |
+| Class notation | AUT-UMS (unattended machinery space) | **Owner instruction, 13 Oct 2026; not on the GA** (SB-15) |
+| Cargo carried | containers, vehicles, pallets, fuel tanks and hazardous materials | **Owner instruction, 13 Oct 2026**; the GA shows the container arrangement only. Dangerous goods depend on class and flag approvals (SB-14) |
+| Cargo payload | 610 t | **Owner figure, 13 Oct 2026; not on the GA** (SOURCE_CONFLICTS SB-2). The site labelled it "Company figure; not stated on the general arrangement" until the owner had the source notes removed (SB-12) |
 | Deadweight | not published | None supplied; the GA has none, and 800 t stays "maximum loading capacity" as the GA labels it (SB-3) |
 | Deck particulars | not published | The GA's main particulars give none (deck area, deck load); omitted (SB-4) |
 | Model | BNB SHOREBRIDGE 55 (55 = nominal length) | Owner instruction, 13 Oct 2026 (section 0) |
@@ -59,7 +72,8 @@ Both are cropped from the 07.10.2026 GA. No title block is published.
 
 **Class, cyber and beach-landing wording.**
 
-- Bureau Veritas: "Under Bureau Veritas (BV) classification", the owner's wording of 13 Oct 2026 (SB-6), stated on its own: a separate Classification row in the specifications and a tag in the hero, apart from the model name and the particulars. Not described as classed, built or certified.
+- Bureau Veritas: "Under Bureau Veritas (BV) classification", the owner's wording of 13 Oct 2026 (SB-6), stated on its own: a separate Classification row in the specifications and a tag in the hero, apart from the model name and the particulars. Not described as classed, built or certified. Always "Bureau Veritas (BV)", never the abbreviation alone (SB-16).
+- AUT-UMS: "Class notation: AUT-UMS / Unattended machinery space" in the Classification group, and "under Bureau Veritas (BV) classification with the AUT-UMS notation" in the copy (owner, 13 Oct 2026; SB-15). Not described as certified.
 - Cyber resilience: "notation in scope", "not yet certified". No certificate is implied.
 - Beach landing: the capability is kept as stated in the brief ("designed for beach landing operations, at suitable, permitted beaches, within the operating limits"). The GA and midship text say nothing about a strengthened bottom, so that mechanism is not claimed. **Needs input:** engineering confirmation of the beaching arrangement and limits (SOURCE_CONFLICTS #11).
 
@@ -92,7 +106,9 @@ Intended operating regions: the Mediterranean, the west coast of Africa, Asia an
 - Map: `components/route-map.tsx` (inline overlay) over `public/images/route/base-map.svg`, both generated by `scripts/create-route-map.py` from Natural Earth land (1:50m drawn; 1:10m land and minor islands used to check that every route stays at sea). Natural Earth is public domain and is credited on the map. Coastlines only, no country borders (RM-3).
 - Origin marker: "Goa · Fomar, Shiroda / BNBSBD shipyard / LOURDES newbuild programme" (until 13 Oct: "Lourdes will be built here"), placed at the Shiroda reference point 15.329 N 74.027 E; the exact yard coordinates are not known (RM-1).
 - Lanes and end points are illustrative choices (RM-2): via Suez to the Mediterranean; via Suez, the Mediterranean and Gibraltar to West Africa (the Cape route is an equally plausible alternative); round Sri Lanka and through Malacca to Asia; south-west into the Indian Ocean. End points are positions at sea, not ports.
-- Animation-ready: each route is a separate `<path id="route-…" pathLength="1">`; how to animate it is described at the top of `route-map.tsx`. Not animated yet.
+- Major ports and operating areas (owner's final changes, 13 Oct 2026; RM-4): an orange point, in the style of the BNBSBD yard marker, at 17 major ports (Mumbai, Kochi, Colombo, Malé, Salalah, Jebel Ali, Djibouti, Jeddah, Port Said, Valletta, Gibraltar, Dakar, Abidjan, Lagos, Mombasa, Singapore, Chittagong; approximate harbour positions, each checked to lie on the 1:10m coastline). The route ends use the same point; the yard keeps its larger marker. The ports are not named on the map (owner: "remove those black circles and the names"), only in the map's screen-reader text. Around Goa and every port is the same illustrative operating radius (520 km, not published); overlapping circles merge into soft, dashed, translucent operating areas. Legend: "BNBSBD shipyard, Goa", "Major port or route end", "Illustrative route", "Illustrative operating area"; caption "Illustrative routes and operating areas from Goa, not confirmed sailing routes or port calls." The ports are reference points, not port calls, agencies or services.
+- Labels: the generator checks that the region, origin and passage labels stay clear of each other, the routes, every point and the map edges at each of the map's four breakpoints, and fails otherwise; a headless-browser check at 16 widths from 320 to 1440 px agreed. Region labels moved for the points: West coast of Africa (-12.5, -2.6), Indian Ocean (56.6, -6.9), the origin label (77.45, 17.0), Bab-el-Mandeb to the Yemen side, Strait of Malacca slightly south, Strait of Gibraltar beside the Gibraltar point (west, without a leader).
+- Animation-ready: each route is a separate `<path id="route-…" pathLength="1">`; the ports and operating areas carry `data-port` and `data-area`; how to animate them is described at the top of `route-map.tsx`. Not animated yet.
 
 ## 4. Removed from the public site
 
@@ -120,6 +136,6 @@ Never published: the midship drawing; the third-party satellite imagery of the y
 ## 6. Honesty status at publication
 
 - Verified from drawings or briefs: the LOURDES particulars and drawing views; the berth and blasting-shed dimensions as annotated.
-- Owner instruction (13 Oct 2026): the model name BNB SHOREBRIDGE 55 and its four-line block, the nominal 55, the cargo payload 610 t (not on the GA), the status "Current newbuild programme", the BV wording "Under Bureau Veritas (BV) classification" and the 400–500 DWT design-to-order invitation.
+- Owner instruction (13 Oct 2026): the model name BNB SHOREBRIDGE 55 and its four-line block, the nominal 55, the cargo payload 610 t (not on the GA), the status "Current newbuild programme", the wording "Under Bureau Veritas (BV) classification" and the 400–500 DWT design-to-order invitation; then the final changes (section 0a): no source notes on the site, "Bureau Veritas (BV)" in full, sea state 5, the cargo types including hazardous materials, the AUT-UMS notation, and the map's ports and operating areas.
 - Illustration: the hero poster, the 3D model, the scroll story, the yard renders, the schematic site plan and the route map. Machinery and bridge equipment in the explanatory views are representative.
-- Needs input (see SOURCE_CONFLICTS.md): crew count, LOURDES livery, beach-landing mechanism, the basis of the 610 t payload against the GA's 800 t maximum loading capacity (SB-2), a deadweight figure if one should be shown (SB-3), the GA drawing number (INT-8), what BNBSBD stands for (INT-9), the containers reading (YD-1), the river name (YD-4), yard structures (YD-2, YD-6), yard coordinates and intended lanes (RM-1, RM-2).
+- Needs input (see SOURCE_CONFLICTS.md): dangerous-goods approvals behind "hazardous materials" (SB-14), the AUT-UMS notation's status with Bureau Veritas (SB-15), the port list and operating radius (RM-4), crew count, LOURDES livery, beach-landing mechanism, the basis of the 610 t payload against the GA's 800 t maximum loading capacity (SB-2), a deadweight figure if one should be shown (SB-3), the GA drawing number (INT-8), what BNBSBD stands for (INT-9), the containers reading (YD-1), the river name (YD-4), yard structures (YD-2, YD-6), yard coordinates and intended lanes (RM-1, RM-2).
